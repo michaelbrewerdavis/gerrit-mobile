@@ -1,0 +1,5 @@
+web:
+  build: .
+  env_file: ./.env
+  environment:
+    VIRTUAL_HOST: gerritmobile.docker
