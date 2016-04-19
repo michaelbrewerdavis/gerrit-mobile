@@ -4,3 +4,5 @@ client/public/js/generated/
 .env
 **/*.log
 **/generated
+.gitmodules
+deploy
