@@ -1,0 +1,30 @@
+{
+  "parser": "babel-eslint",
+  "extends": "standard",
+  "plugins": [
+    "react"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "react/jsx-uses-react": 1,
+    "no-unused-vars": 0,
+
+    "comma-dangle": [2, "never"],
+    "no-var": [2],
+    "space-before-function-paren": [1, "never"],
+    "space-in-parens": 0,
+
+    "no-warning-comments": 1,
+
+    "no-alert": [1],
+    "no-console": [1],
+    "no-debugger": [1],
+  },
+  "globals": {
+    "alert": false
+  }
+}

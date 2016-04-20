@@ -1,11 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-import { createStore, applyMiddleware } from 'redux'
-import { connect, Provider } from 'react-redux'
-import { createAction, handleActions } from 'redux-actions'
-import thunk from 'redux-thunk'
-import Immutable, { Map } from 'immutable'
-import $ from 'jquery'
+import { Map } from 'immutable'
 
 require('../css/app.css')
 
@@ -14,7 +8,7 @@ function DiffItem(props, state) {
     return lines.map((line, index) => {
       return <div key={index} className={style}>{line}</div>
     }).toJS()
-  };
+  }
 
   //   return lines.map((line) => {
   //     return <div className={style}>{line}</div>
@@ -22,15 +16,15 @@ function DiffItem(props, state) {
   // }
   // debugger
   return (
-    <div className="gerrit-review-file-diff-block">
+    <div className='file-diff-block'>
     {
       props.diff.get('ab') ? diffBlock(props.diff.get('ab')) : ''
     }
     {
-      props.diff.get('a') ? diffBlock(props.diff.get('a'), 'gerrit-review-file-diff-block-a') : ''
+      props.diff.get('a') ? diffBlock(props.diff.get('a'), 'file-diff-block-a') : ''
     }
     {
-      props.diff.get('b') ? diffBlock(props.diff.get('b'), 'gerrit-review-file-diff-block-b') : ''
+      props.diff.get('b') ? diffBlock(props.diff.get('b'), 'file-diff-block-b') : ''
     }
     </div>
   )
@@ -41,7 +35,7 @@ function ReviewFileDiff(props, state) {
   const content = diff.get('content') || Map()
 
   return (
-    <div className="gerrit-review-file-diff">
+    <div className='file-diff'>
     {
       content.map((diff, index) => {
         return <DiffItem key={index} diff={diff} />
@@ -52,27 +46,25 @@ function ReviewFileDiff(props, state) {
 }
 
 export default class ReviewFile extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     return (
-      <div className="gerrit-review-file">
-        <div className="gerrit-review-file-header">
-          <div className="gerrit-review-file-header-info">
-            <div className="gerrit-review-file-header-change">
-              { this.props.state.getIn(['changeDetail','subject']) }
+      <div className='file'>
+        <div className='header file-header'>
+          <div className='file-header-info'>
+            <div className='header-title file-header-change'>
+              { this.props.state.getIn(['changeDetail', 'subject']) }
             </div>
-            <div className="gerrit-review-file-name">
+            <div className='header-title file-name'>
               {this.props.file}
             </div>
           </div>
-          <div className="up-button gerrit-review-file-up" onClick={() => this.props.selectFile(null)}>
+          <div className='up-button file-up' onClick={() => this.props.selectFile(null)}>
             Up
           </div>
         </div>
-        <ReviewFileDiff diff={this.props.state.get('fileDetail')} />
+        <div className='header-body'>
+          <ReviewFileDiff diff={this.props.state.get('fileDetail')} />
+        </div>
       </div>
     )
   }

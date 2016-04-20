@@ -7,49 +7,49 @@ body {
   font-family: sans-serif;
 }
 
-#gerrit-dashboard {
+#dashboard {
   max-width: 100%;
   overflow-x: hidden;
 }
 
-#gerrit-dashboard-header {
+#dashboard-header {
   display: flex;
   justify-content: space-between;
   align-content: center;
 }
 
-.gerrit-dashboard-header-title {
+.dashboard-header-title {
   font-weight: bold;
   display: flex;
   text-align: center;
   vertical-align: middle;
 }
 
-.gerrit-dashboard-header-error {
+.dashboard-header-error {
   color: red;
   font-weight: bold;
 }
 
-.gerrit-user {
+.user {
   display: flex;
   align-items: center;
 }
 
-.gerrit-user-username {
+.user-username {
   font-style: italic;
 }
 
-.gerrit-user-avatar {
+.user-avatar {
   padding-left: 10px;
 }
 
-.gerrit-changes {
+.dashboard-changes {
   display: flex;
   flex-direction: column;
   align-content: flex-start;
 }
 
-.gerrit-changes-label {
+.dashboard-changes-label {
   margin-top: 20px;
   margin-bottom: 5px;
   padding: 3px;
@@ -59,48 +59,60 @@ body {
   background-color: #eee;
 }
 
-.gerrit-change {
+.dashboard-change {
   border: solid #aaa 1px;
   border-radius: 6px;
   margin: 5px;
   margin-bottom: 10px;
 }
 
-.gerrit-change-subject {
+.dashboard-change-subject {
   padding: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.gerrit-change-details {
+.dashboard-change-details {
   font-size: 50%;
   display: flex;
 }
 
-.gerrit-change-details > * {
+.dashboard-change-details > * {
   padding: 2px 3px;
 }
 
-.gerrit-review-change {
+.change {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.gerrit-review-change-header {
+.header {
   flex: 0 0 auto;
+  width: 100%;
+  border-bottom: solid 1px #aaa;
+  padding-bottom: 5px;
+}
+
+.header-title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 80%;
+}
+
+.body {
+  flex: 1 1 auto;
+  position: relative;
+  overflow-y: auto;
+}
+
+.change-header {
   display: flex;
   justify-content: space-between;
   align-content: center;
   white-space: nowrap;
   padding-bottom: 3px;
-  border-bottom: solid 1px #aaa;
-}
-
-.gerrit-review-change-header-title {
-  text-overflow: ellipsis;
-  overflow: hidden;
 }
 
 .up-button {
@@ -109,24 +121,19 @@ body {
   border-radius: 6px;
 }
 
-.gerrit-review-change-body {
-  flex: 1 1 auto;
-  position: relative;
-  overflow-y: auto;
-}
-.gerrit-review-change-commit-message {
+.change-commit-message {
   padding: 10px 0px 20px;
   font-family: monospace;
   white-space: pre;
   overflow-x: auto;
 }
 
-.gerrit-review-file-list-item {
+.file-list-item {
   padding: 5px;
   margin: 0px 5px;
 }
 
-.gerrit-review-file-list-item-name {
+.file-list-item-name {
   padding: 5px;
   border: solid #aaa 1px;
   border-radius: 6px;
@@ -135,29 +142,28 @@ body {
   white-space: nowrap;
 }
 
-.gerrit-review-file {
+.file {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
-.gerrit-review-file-header {
-  flex: 0 0 auto;
+.file-header {
   display: flex;
   justify-content: space-between;
-  border-bottom: solid #aaa 1px;
-  padding-bottom: 5px;
 }
 
-.gerrit-review-file-header-info {
+.file-header-info {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
+  width: 80%;
 }
 
-.gerrit-review-file-header-change {
+.file-header-change {
   font-size: 60%
 }
 
-.gerrit-review-file-diff {
+.file-diff {
   flex: 1 1 auto;
   font-family: monospace;
   height: 100%;
@@ -166,13 +172,13 @@ body {
   overflow: scroll;
 }
 
-.gerrit-review-file-diff-block {
+.file-diff-block {
 }
 
-.gerrit-review-file-diff-block-a {
+.file-diff-block-a {
   background-color: #FAA;
 }
 
-.gerrit-review-file-diff-block-b {
+.file-diff-block-b {
   background-color: #AFA;
 }
