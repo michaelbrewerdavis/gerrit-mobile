@@ -1,4 +1,4 @@
-Provides a mobile view of [Gerrit Code Review][https://www.gerritcodereview.com].
+Provides a mobile view of [Gerrit Code Review](https://www.gerritcodereview.com).
 
 To start:
 - Initialize your `.env` file with the desired Gerrit endpoint.
@@ -8,14 +8,14 @@ To start:
 You can also use the accompanying Docker and Docker Compose files.
 
 To use:
-- Ensure you have an http password set in Gerrit (see user preferences).
+- (Depending on gerrit config: ensure you have an http password set in Gerrit (see user preferences))
 - Hit your URL (at first localhost:3000, but I assume you can do better
   than that)
 - Be happy
 
 Next steps:
-- Comments - view and add
+- comments - view and add
 - line numbers
-- Eliminate need for http password set in Gerrit
+- eliminate need for http password set in Gerrit
 - add react router for url state
-- Voting - view and add
+- voting - view and add
