@@ -52,7 +52,7 @@ const actions = {
 }
 
 const ReduxedApp = connect(
-    (state) => { state },
+    (state) => ({ state }),
     actions
   )(App)
 
