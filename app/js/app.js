@@ -102,10 +102,17 @@ function loadDashboard() {
   return (dispatch, getState) => {
     dispatch(actions.setLoading(true))
 
-    Promise.all([
-      makeAPICall('/accounts/self'),
-      makeAPICall('/changes/?q=is:open+owner:self&q=is:open+reviewer:self+-owner:self&o=LABELS&o=DETAILED_ACCOUNTS'),
-    ])
+    return makeAPICall('/login', false)
+    .catch( (error) => {
+      // ignore login error - may be CORS error on redirect
+      console.log(error)
+    })
+    .then( () => {
+      return Promise.all([
+        makeAPICall('/accounts/self'),
+        makeAPICall('/changes/?q=is:open+owner:self&q=is:open+reviewer:self+-owner:self&o=LABELS&o=DETAILED_ACCOUNTS'),
+      ])
+    })
     .then( (responses) => {
       console.log(responses)
       dispatch(actions.setUserData( immutableFromJS(responses[0]) ))
@@ -126,7 +133,7 @@ function loadDashboard() {
 function loadChange(changeId) {
   return (dispatch, getState) => {
     dispatch(actions.setLoading(true))
-    makeAPICall('/changes/' + changeId + '/detail?o=CURRENT_REVISION&o=CURRENT_COMMIT&o=ALL_FILES')
+    return makeAPICall('/changes/' + changeId + '/detail?o=CURRENT_REVISION&o=CURRENT_COMMIT&o=ALL_FILES')
     .then( (response) => {
       console.log(response)
       dispatch(actions.setChangeDetail( immutableFromJS(response) ))
@@ -139,7 +146,7 @@ function loadChange(changeId) {
 function loadFile(change, revision, fileId) {
   return (dispatch, getState) => {
     dispatch(actions.setLoading(true))
-    makeAPICall('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
+    return makeAPICall('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
     .then( (response) => {
       console.log(response)
       dispatch(actions.setFileDetail( immutableFromJS(response) ))
@@ -167,7 +174,10 @@ function immutableFromJS(js) {
       Immutable.Seq(js).map(immutableFromJS).toMap();
 }
 
-function makeAPICall(path) {
+function makeAPICall(path, requireAuth = true) {
+  if (requireAuth) {
+    path = '/a' + path
+  }
   return new Promise( (resolve, reject) => {
     $.ajax({
       url: '/api' + path,

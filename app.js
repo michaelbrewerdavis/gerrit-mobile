@@ -26,7 +26,7 @@ apiProxy.on('error', function(err, req, res) {
 })
 
 app.all("/api/*", function(req, res){
-  req.url = req.url.replace(/^\/api\//, "/a/")
+  req.url = req.url.replace(/^\/api\//, "/")
   console.log('proxying:' + req.url)
   apiProxy.web(req, res);
 });
