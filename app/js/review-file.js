@@ -1,5 +1,7 @@
 import React from 'react'
 import { Map } from 'immutable'
+import { connect } from 'react-redux'
+import { actions } from './actions'
 
 require('../css/app.css')
 
@@ -45,17 +47,17 @@ function ReviewFileDiff(props, state) {
   )
 }
 
-export default class ReviewFile extends React.Component {
+class ReviewFile extends React.Component {
   render() {
     return (
       <div className='file'>
         <div className='header file-header'>
           <div className='file-header-info'>
             <div className='header-title file-header-change'>
-              { this.props.state.getIn(['changeDetail', 'subject']) }
+              { this.props.state.change.getIn(['changeDetail', 'subject']) }
             </div>
             <div className='header-title file-name'>
-              {this.props.file}
+              {this.props.state.file.get('currentFile')}
             </div>
           </div>
           <div className='up-button file-up' onClick={() => this.props.selectFile(null)}>
@@ -63,15 +65,27 @@ export default class ReviewFile extends React.Component {
           </div>
         </div>
         <div className='header-body'>
-          <ReviewFileDiff diff={this.props.state.get('fileDetail')} />
+          <ReviewFileDiff diff={this.props.state.file.get('fileDetail')} />
         </div>
       </div>
     )
   }
 
   componentDidMount() {
-    if (!this.props.state.get('fileDetail')) {
-      this.props.loadFile(this.props.change, this.props.revision, this.props.file)
+    const changeId = this.props.params.changeId
+    const revisionId = this.props.params.revisionId
+    const fileName = this.props.params.fileName
+    const loadedChangeId = this.props.state.change.get('currentChange')
+    const loadedRevisionId = this.props.state.change.getIn(['changeDetail', 'current_revision'])
+    const loadedFileName = this.props.state.file.get('currentFile')
+
+    if (changeId !== loadedChangeId || fileName !== loadedFileName) {
+      this.props.loadFile(changeId, revisionId, fileName)
     }
   }
 }
+
+export default connect(
+  (state) => ({ state }),
+  actions
+)(ReviewFile)
