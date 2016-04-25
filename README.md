@@ -16,6 +16,4 @@ To use:
 Next steps:
 - comments - view and add
 - line numbers
-- eliminate need for http password set in Gerrit
-- add react router for url state
 - voting - view and add

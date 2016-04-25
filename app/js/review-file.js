@@ -49,6 +49,12 @@ function ReviewFileDiff(props, state) {
 }
 
 class ReviewFile extends React.Component {
+  comments() {
+    const allComments = this.props.state.change.getIn(['changeDetail', 'comments', this.props.params.fileName])
+    const patchNumber = this.props.state.change.getIn(['changeDetail', 'revisions', this.props.params.revisionId, '_number'])
+    return allComments.filter((comment) => ( comment.get('patch_set') === patchNumber ))
+  }
+
   render() {
     return (
       <div className='file'>
@@ -68,7 +74,7 @@ class ReviewFile extends React.Component {
           </Link>
         </div>
         <div className='header-body'>
-          <ReviewFileDiff diff={this.props.state.file.get('fileDetail')} />
+          <ReviewFileDiff diff={this.props.state.file.get('fileDetail')} comments={this.comments()}/>
         </div>
       </div>
     )
