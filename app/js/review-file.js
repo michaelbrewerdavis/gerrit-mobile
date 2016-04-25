@@ -2,6 +2,7 @@ import React from 'react'
 import { Map } from 'immutable'
 import { connect } from 'react-redux'
 import { actions } from './actions'
+import { Link } from 'react-router'
 
 require('../css/app.css')
 
@@ -60,9 +61,11 @@ class ReviewFile extends React.Component {
               {this.props.state.file.get('currentFile')}
             </div>
           </div>
-          <div className='up-button file-up' onClick={() => this.props.selectFile(null)}>
-            Up
-          </div>
+          <Link to={'/changes/' + this.props.state.change.get('currentChange')}>
+            <div className='up-button file-up'>
+              Up
+            </div>
+          </Link>
         </div>
         <div className='header-body'>
           <ReviewFileDiff diff={this.props.state.file.get('fileDetail')} />
