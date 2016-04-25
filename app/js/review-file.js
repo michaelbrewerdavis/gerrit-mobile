@@ -1,5 +1,5 @@
 import React from 'react'
-import { Map } from 'immutable'
+import { Map, List } from 'immutable'
 import { connect } from 'react-redux'
 import { actions } from './actions'
 import { Link } from 'react-router'
@@ -50,9 +50,10 @@ function ReviewFileDiff(props, state) {
 
 class ReviewFile extends React.Component {
   comments() {
-    const allComments = this.props.state.change.getIn(['changeDetail', 'comments', this.props.params.fileName])
-    const patchNumber = this.props.state.change.getIn(['changeDetail', 'revisions', this.props.params.revisionId, '_number'])
-    return allComments.filter((comment) => ( comment.get('patch_set') === patchNumber ))
+    return []
+    // const allComments = this.props.state.change.getIn(['changeDetail', 'comments', this.props.params.fileName]) || List()
+    // const patchNumber = this.props.state.change.getIn(['changeDetail', 'revisions', this.props.params.revisionId, '_number'])
+    // return allComments.filter((comment) => ( comment.get('patch_set') === patchNumber ))
   }
 
   render() {
