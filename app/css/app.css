@@ -259,3 +259,19 @@ body {
 .file-diff-block-b {
   background-color: #AFA;
 }
+
+.comment {
+  background-color: #FFA;
+  margin: 6px 0px;
+}
+
+.comment-header {
+  display: flex;
+  font: 60%;
+  font-weight: bold;
+  justify-content: space-between;
+}
+
+.comment-body {
+  white-space: pre-wrap;
+}

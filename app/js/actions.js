@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions'
 import Immutable from 'immutable'
 import $ from 'jquery'
+import { immutableFromJS } from './helpers'
 
 export const actions = {
   loadDashboard: loadDashboard,
@@ -100,14 +101,6 @@ function loadErrorHandler(dispatch) {
     dispatch(actions.currentFile(null))
     dispatch(actions.setLoading(false))
   }
-}
-
-function immutableFromJS(js) {
-  return typeof js !== 'object' || js === null
-    ? js
-    : Array.isArray(js)
-      ? Immutable.Seq(js).map(immutableFromJS).toList()
-      : Immutable.Seq(js).map(immutableFromJS).toMap()
 }
 
 function makeAPICall(path, requireAuth = true) {

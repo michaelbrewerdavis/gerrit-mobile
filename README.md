@@ -15,5 +15,5 @@ To use:
 
 Next steps:
 - comments - view and add
-- line numbers
+- compare between revisions
 - voting - view and add
