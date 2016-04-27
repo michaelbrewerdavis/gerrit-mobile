@@ -6,42 +6,118 @@ import { Link } from 'react-router'
 
 require('../css/app.css')
 
-function DiffItem(props, state) {
-  const diffBlock = (lines, style) => {
-    return lines.map((line, index) => {
-      return <div key={index} className={style}>{line}</div>
-    }).toJS()
-  }
+const LINES_TO_COLLAPSE = 10
 
-  //   return lines.map((line) => {
-  //     return <div className={style}>{line}</div>
-  //   }
-  // }
-  // debugger
+function DiffLine(props, state) {
   return (
-    <div className='file-diff-block'>
+    <div className={props.style}>
+      <div className='line-number'>{props.lineNumber}</div>
+      <div className='line-content'>{props.line}</div>
+    </div>
+  )
+}
+
+function DiffBlock(props, state) {
+  return (
+    <div>
     {
-      props.diff.get('ab') ? diffBlock(props.diff.get('ab')) : ''
-    }
-    {
-      props.diff.get('a') ? diffBlock(props.diff.get('a'), 'file-diff-block-a') : ''
-    }
-    {
-      props.diff.get('b') ? diffBlock(props.diff.get('b'), 'file-diff-block-b') : ''
+      props.lines.map((line, index) => {
+        return (
+          <DiffLine key={index}
+            line={line}
+            lineNumber={props.startingLineNumber + index}
+            style={props.style} />
+        )
+      }).toJS()
     }
     </div>
   )
 }
 
+class ExpandableDiffBlock extends React.Component {
+  constructor() {
+    super()
+    this.state = { expanded: false }
+  }
+
+  shouldExpand() {
+    return this.state.expanded || this.props.lines.size < 2 * LINES_TO_COLLAPSE
+  }
+
+  doExpand() {
+    this.setState({ expanded: true })
+  }
+
+  preLines() {
+    if (this.props.startingLineNumber === 1) {
+      return List()
+    }
+    return this.props.lines.slice(0, LINES_TO_COLLAPSE)
+  }
+
+  render() {
+    if (this.shouldExpand()) {
+      return (
+        <DiffBlock {...this.props} />
+      )
+    } else {
+      return (
+        <div className='expandable-diff-block'>
+          <DiffBlock {...this.props} lines={this.preLines()} />
+          <div className='expandable-diff-expand' onClick={this.doExpand.bind(this)}>
+            ...{this.props.lines.size - 2 * LINES_TO_COLLAPSE} lines collapsed...
+          </div>
+          <DiffBlock {...this.props}
+            lines={this.props.lines.slice(-LINES_TO_COLLAPSE)}
+            startingLineNumber={this.props.startingLineNumber + this.props.lines.size - LINES_TO_COLLAPSE}/>
+        </div>
+      )
+    }
+  }
+}
+
+function DiffItem(props, state) {
+  return (
+    <div className='file-diff-block'>
+    {
+      props.diff.get('ab') ? <ExpandableDiffBlock lines={props.diff.get('ab')} startingLineNumber={props.lineNumbers.get('b')} style='line' /> : ''
+    }
+    {
+      props.diff.get('a') ? <DiffBlock lines={props.diff.get('a')} startingLineNumber={props.lineNumbers.get('a')} style='line file-diff-block-a' /> : ''
+    }
+    {
+      props.diff.get('b') ? <DiffBlock lines={props.diff.get('b')} startingLineNumber={props.lineNumbers.get('b')} style='line file-diff-block-b' /> : ''
+    }
+    </div>
+  )
+}
+
+function incrementLineNumbers(lineNumbers, diff) {
+  if (diff.get('a')) {
+    lineNumbers = lineNumbers.set('a', lineNumbers.get('a') + diff.get('a').size)
+  }
+  if (diff.get('b')) {
+    lineNumbers = lineNumbers.set('b', lineNumbers.get('b') + diff.get('b').size)
+  }
+  if (diff.get('ab')) {
+    lineNumbers = lineNumbers.set('a', lineNumbers.get('a') + diff.get('ab').size)
+    lineNumbers = lineNumbers.set('b', lineNumbers.get('b') + diff.get('ab').size)
+  }
+  return lineNumbers
+}
+
 function ReviewFileDiff(props, state) {
   const diff = props.diff || Map()
-  const content = diff.get('content') || Map()
+  const content = diff.get('content') || List()
+  let startingLineNumbers = Map({ a: 1, b: 1 })
 
   return (
     <div className='file-diff'>
     {
       content.map((diff, index) => {
-        return <DiffItem key={index} diff={diff} />
+        const lineNumbers = startingLineNumbers
+        startingLineNumbers = incrementLineNumbers(lineNumbers, diff)
+        return <DiffItem key={index} diff={diff} lineNumbers={lineNumbers} />
       }).valueSeq().toJS()
     }
     </div>
