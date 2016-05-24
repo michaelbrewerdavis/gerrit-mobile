@@ -78,6 +78,7 @@ class ExpandableDiffBlock extends React.Component {
   constructor() {
     super()
     this.state = { expanded: false }
+    this._doExpand = this.doExpand.bind(this)
   }
 
   shouldExpand() {
@@ -104,12 +105,12 @@ class ExpandableDiffBlock extends React.Component {
       return (
         <div className='expandable-diff-block'>
           <DiffBlock {...this.props} lines={this.preLines()} />
-          <div className='expandable-diff-expand' onClick={this.doExpand.bind(this)}>
+          <div className='expandable-diff-expand' onClick={this._doExpand}>
             ...{this.props.lines.size - 2 * LINES_TO_COLLAPSE} lines collapsed...
           </div>
           <DiffBlock {...this.props}
             lines={this.props.lines.slice(-LINES_TO_COLLAPSE)}
-            startingLineNumber={this.props.startingLineNumber + this.props.lines.size - LINES_TO_COLLAPSE}/>
+            startingLineNumber={this.props.startingLineNumber + this.props.lines.size - LINES_TO_COLLAPSE} />
         </div>
       )
     }
@@ -206,7 +207,7 @@ class ReviewFile extends React.Component {
           </Link>
         </div>
         <div className='header-body'>
-          <ReviewFileDiff diff={this.props.state.file.get('fileDetail')} comments={this.comments()}/>
+          <ReviewFileDiff diff={this.props.state.file.get('fileDetail')} comments={this.comments()} />
         </div>
       </div>
     )

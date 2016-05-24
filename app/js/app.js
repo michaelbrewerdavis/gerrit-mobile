@@ -34,7 +34,7 @@ ReactDOM.render(
         <Route path='changes/:changeId'>
           <IndexRoute component={ReviewChange} />
           <Route path='revisions/:revisionId'>
-            <Route path='files/:fileName' component={ReviewFile}></Route>
+            <Route path='files/:fileName' component={ReviewFile} />
           </Route>
         </Route>
       </Route>

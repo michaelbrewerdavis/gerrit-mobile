@@ -18,9 +18,9 @@ function pathToFile(changeId, revisionId, filename) {
 function FileListItem(props, state) {
   return (
     <Link to={pathToFile(props.changeId, props.revision, props.filename)}>
-    <div className='file-list-item'>
-      <div className='file-list-item-name'>{props.filename}</div>
-    </div>
+      <div className='file-list-item'>
+        <div className='file-list-item-name'>{props.filename}</div>
+      </div>
     </Link>
   )
 }
@@ -47,6 +47,8 @@ class Message extends React.Component {
     super(props)
     this.state = { expanded: false }
     this.messageBody = this.props.message.get('message')
+    this._toggleState = this.toggleState.bind(this)
+
     let lines = this.messageBody.split('\n\n')
     if (lines.length > 1) {
       this.firstLine = lines.slice(0, 2).join(' ')
@@ -91,7 +93,7 @@ class Message extends React.Component {
   render() {
     return (
       <div className='message'>
-        <div className='message-short' onClick={this.toggleState.bind(this)}>
+        <div className='message-short' onClick={this._toggleState}>
           <div className='message-author'>{this.props.message.getIn(['author', 'username'])}</div>
           <div className='message-title'>{this.firstLine}</div>
         </div>
@@ -119,11 +121,13 @@ function Messages(props, state) {
     <div className='section messages'>
     {
       messages.map((message) => {
-        return <Message key={message.get('id')}
-                changeId={props.changeId}
-                revision={props.revision}
-                message={message}
-                comments={commentsForMessage(props.comments, message)} />
+        return (
+          <Message key={message.get('id')}
+            changeId={props.changeId}
+            revision={props.revision}
+            message={message}
+            comments={commentsForMessage(props.comments, message)} />
+        )
       }).toArray()
     }
     </div>

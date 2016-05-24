@@ -24,8 +24,13 @@ function loadDashboard() {
 
     return makeAPICall('/login', false)
     .catch( (error) => {
-      // ignore login error - may be CORS error on redirect
-      console.log(error)
+      // ignore non-auth login error - may be CORS error on redirect
+      if (error.status !== 401 && error.status !== 403) {
+        console.log(error)
+      } else {
+        dispatch(actions.setDashboardError(true))
+        throw error
+      }
     })
     .then( () => {
       return Promise.all([

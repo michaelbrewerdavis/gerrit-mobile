@@ -1,6 +1,6 @@
 {
   "parser": "babel-eslint",
-  "extends": "standard",
+  "extends": [ "standard", "standard-react" ],
   "plugins": [
     "react"
   ],
@@ -12,6 +12,9 @@
   "rules": {
     "react/jsx-uses-react": 1,
     "no-unused-vars": 0,
+    "react/prop-types": 0,
+    "react/jsx-curly-spacing": 0,
+    "react/jsx-boolean-value": [2, "always"],
 
     "comma-dangle": [2, "never"],
     "no-var": [2],

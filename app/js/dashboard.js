@@ -36,7 +36,7 @@ function Changes(props, state) {
       <div className='dashboard-changes-label'>{props.label}</div>
       {
         changes.map((change) => {
-          return <Change key={change.get('id')} change={change} includeUsername={props.includeUsername}/>
+          return <Change key={change.get('id')} change={change} includeUsername={props.includeUsername} />
         })
       }
     </div>
@@ -60,7 +60,7 @@ function User(props, state) {
 function DashboardHeader(props, state) {
   return (
     <div id='dashboard-header'>
-      <div className='dashboard-header-title' onClick={ () => props.loadDashboard() }>
+      <div className='dashboard-header-title' onClick={props.loadDashboard}>
         Dashboard
       </div>
       <div className='dashboard-error'>{props.state.app.get('error')}</div>
