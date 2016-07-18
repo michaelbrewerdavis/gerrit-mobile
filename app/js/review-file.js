@@ -4,33 +4,132 @@ import { connect } from 'react-redux'
 import { actions } from './actions'
 import { Link } from 'react-router'
 import { immutableFromJS } from './helpers'
+import autosize from 'autosize'
 
 require('../css/app.css')
 
 const LINES_TO_COLLAPSE = 10
 
-function Comment(props) {
-  return (
-    <div className='comment'>
-      <div className='comment-header'>
-        <div className='comment-author'>
-          { props.comment.getIn(['author', 'username']) }
+class Comment extends React.Component {
+  constructor() {
+    super()
+    this.state = { editing: false }
+    this.editComment = this.editComment.bind(this)
+    this.cancelEdit = this.cancelEdit.bind(this)
+    this.saveComment = this.saveComment.bind(this)
+    this.deleteComment = this.deleteComment.bind(this)
+    this.replyToComment = this.replyToComment.bind(this)
+  }
+
+  componentDidUpdate() {
+    if (this.refs.textarea) {
+      autosize(this.refs.textarea)
+    }
+  }
+
+  editComment() {
+    this.props.editComment(this.props.comment)
+  }
+
+  cancelEdit() {
+    if (this.props.comment.get('is_new')) {
+      this.deleteComment()
+    } else {
+      this.props.cancelEditComment(this.props.comment)
+    }
+  }
+
+  deleteComment() {
+    this.props.deleteComment(this.props.changeId, this.props.revisionId, this.props.comment)
+  }
+
+  replyToComment() {
+    this.props.replyToComment(this.props.comment)
+  }
+
+  saveComment() {
+    const comment = this.props.comment.set('message', this.refs.textarea.value)
+    this.props.saveComment(this.props.changeId, this.props.revisionId, comment)
+    this.props.cancelEditComment(this.props.comment)
+  }
+
+  isEditing() {
+    return this.props.comment.get('editing')
+  }
+
+  getActions() {
+    if (this.props.type === 'draft') {
+      if (this.isEditing()) {
+        return (
+          <div>
+            <input type='button' onClick={this.saveComment} value='Save' />
+            <input type='button' onClick={this.cancelEdit} value='Cancel' />
+          </div>
+        )
+      } else {
+        return (
+          <div>
+            <input type='button' onClick={this.editComment} value='Edit' />
+            <input type='button' onClick={this.deleteComment} value='Delete' />
+          </div>
+        )
+      }
+    } else {
+      return (
+        <div>
+          <input type='button' onClick={this.replyToComment} value='Reply' />
         </div>
-        <div className='comment-time'>
-          { new Date(props.comment.get('updated')).toLocaleString() }
+      )
+    }
+  }
+
+  getContent() {
+    if (this.isEditing()) {
+      return (
+        <div className='comment-edit'>
+          <textarea ref='textarea' className='comment-edit-textarea' defaultValue={this.props.comment.get('message')} />
+        </div>
+      )
+    } else {
+      return (
+        <div className='comment-body'>
+          {this.props.comment.get('message')}
+        </div>
+      )
+    }
+  }
+
+  getDate() {
+    const updated = this.props.comment.get('updated')
+    return updated ? new Date(updated).toLocaleString() : ' '
+  }
+
+  render() {
+    const topLevelClass = 'comment comment-' + this.props.type
+    return (
+      <div className={topLevelClass}>
+        <div className='comment-header'>
+          <div className='comment-author'>
+            { this.props.comment.getIn(['author', 'username']) }
+          </div>
+          <div className='comment-time'>
+            { this.getDate() }
+          </div>
+        </div>
+        { this.getContent() }
+        <div className='comment-actions'>
+          { this.getActions() }
         </div>
       </div>
-      <div className='comment-body'>
-        {props.comment.get('message')}
-      </div>
-    </div>
-  )
+    )
+  }
 }
 
-function getCommentsForLine(lineNumber, comments) {
+function getCommentsForLine(props, type) {
+  let { comments, lineNumber, ...rest } = props
   if (!comments) { return null }
 
-  comments = comments.get(String(lineNumber))
+  comments = comments.getIn([lineNumber, type])
   if (!comments || !comments.size) { return null }
 
   comments = comments.sort().valueSeq()
@@ -38,7 +137,7 @@ function getCommentsForLine(lineNumber, comments) {
     <div className='comments'>
     {
       comments.map((comment, key) => (
-        <Comment key={key} comment={comment} />
+        <Comment {...rest} key={key} comment={comment} type={type} />
       ))
     }
     </div>
@@ -47,26 +146,28 @@ function getCommentsForLine(lineNumber, comments) {
 function DiffLine(props) {
   return (
     <div>
-      <div className={props.style}>
+      <div className={props.style} onClick={props.addComment.bind(null, { filename: props.filename, path: props.filename, line: props.lineNumber, patch_set: props.patchNumber })}>
         <div className='line-number'>{props.lineNumber}</div>
         <div className='line-content'>{props.line}</div>
       </div>
-      { getCommentsForLine(props.lineNumber, props.comments) }
+      { getCommentsForLine(props, 'committed') }
+      { getCommentsForLine(props, 'draft') }
     </div>
   )
 }
 
 function DiffBlock(props) {
+  const { lines, ...rest } = props
   return (
     <div>
     {
-      props.lines.map((line, index) => {
+      lines.map((line, index) => {
+        const lineNumber = props.startingLineNumber + index
         return (
-          <DiffLine key={index}
+          <DiffLine {...rest}
+            key={index}
             line={line}
-            comments={props.comments}
-            lineNumber={props.startingLineNumber + index}
-            style={props.style} />
+            lineNumber={lineNumber} />
         )
       }).toJS()
     }
@@ -118,16 +219,17 @@ class ExpandableDiffBlock extends React.Component {
 }
 
 function DiffItem(props) {
+  const { diff, comments, lineNumbers, ...rest } = props
   return (
     <div className='file-diff-block'>
     {
-      props.diff.get('ab') ? <ExpandableDiffBlock comments={props.comments.get('b')} lines={props.diff.get('ab')} startingLineNumber={props.lineNumbers.get('b')} style='line' /> : ''
+      props.diff.get('ab') ? <ExpandableDiffBlock {...rest} comments={comments.get('b')} lines={diff.get('ab')} startingLineNumber={lineNumbers.get('b')} style='line' /> : ''
     }
     {
-      props.diff.get('a') ? <DiffBlock comments={props.comments.get('a')} lines={props.diff.get('a')} startingLineNumber={props.lineNumbers.get('a')} style='line file-diff-block-a' /> : ''
+      props.diff.get('a') ? <DiffBlock {...rest} comments={comments.get('a')} lines={diff.get('a')} startingLineNumber={lineNumbers.get('a')} style='line file-diff-block-a' /> : ''
     }
     {
-      props.diff.get('b') ? <DiffBlock comments={props.comments.get('b')} lines={props.diff.get('b')} startingLineNumber={props.lineNumbers.get('b')} style='line file-diff-block-b' /> : ''
+      props.diff.get('b') ? <DiffBlock {...rest} comments={comments.get('b')} lines={diff.get('b')} startingLineNumber={lineNumbers.get('b')} style='line file-diff-block-b' /> : ''
     }
     </div>
   )
@@ -158,7 +260,7 @@ function ReviewFileDiff(props) {
       content.map((diff, index) => {
         const lineNumbers = startingLineNumbers
         startingLineNumbers = incrementLineNumbers(lineNumbers, diff)
-        return <DiffItem key={index} comments={props.comments} diff={diff} lineNumbers={lineNumbers} />
+        return <DiffItem {...props} key={index} diff={diff} lineNumbers={lineNumbers} />
       }).valueSeq().toJS()
     }
     </div>
@@ -166,48 +268,61 @@ function ReviewFileDiff(props) {
 }
 
 class ReviewFile extends React.Component {
-  getCommentsForRevision(revision) {
-    const allComments = this.props.state.change.getIn(['changeDetail', 'comments', this.props.params.fileName]) || List()
-    const patchNumber = this.props.state.change.getIn(['changeDetail', 'revisions', revision, '_number'])
-    const commentsForRevision = allComments.filter((comment) => ( comment.get('patch_set') === (patchNumber) ))
-    const lineNumbersToComments = {}
-    commentsForRevision.forEach((comment) => {
-      const line = comment.get('line')
-      const date = Date.parse(comment.get('updated'))
-      if (!lineNumbersToComments[line]) {
-        lineNumbersToComments[line] = {}
-      }
-      lineNumbersToComments[line][date] = comment
+  getPatchNumber(revision) {
+    return this.props.state.change.getIn(['changeDetail', 'revisions', revision, '_number'])
+  }
+
+  getCommentsForPatchSet(patchNumber) {
+    let lineNumbersToComments = Map()
+    const types = ['committed', 'draft']
+
+    types.forEach((type) => {
+      const allComments = this.props.state.change.getIn(['comments', type, this.props.params.fileName]) || List()
+      const commentsForRevision = allComments.filter((comment) => ( comment.get('patch_set') === (patchNumber) ))
+      commentsForRevision.forEach((comment) => {
+        const line = comment.get('line')
+        const id = comment.get('id')
+        lineNumbersToComments = lineNumbersToComments.setIn([line, type, id], comment)
+      })
     })
-    return immutableFromJS(lineNumbersToComments)
+    return lineNumbersToComments
   }
 
   comments() {
     return Map({
-      b: this.getCommentsForRevision(this.props.params.revisionId)
+      b: this.getCommentsForPatchSet( this.getPatchNumber(this.props.params.revisionId) )
     })
   }
 
   render() {
+    const { state, ...props } = this.props
+
+    console.log(this.comments().toJS())
     return (
       <div className='file'>
         <div className='header file-header'>
           <div className='file-header-info'>
             <div className='header-title file-header-change'>
-              { this.props.state.change.getIn(['changeDetail', 'subject']) }
+              { state.change.getIn(['changeDetail', 'subject']) }
             </div>
             <div className='header-title file-name'>
-              {this.props.state.file.get('currentFile')}
+              { state.file.get('currentFile')}
             </div>
           </div>
-          <Link to={'/changes/' + this.props.state.change.get('currentChange')}>
+          <Link to={'/changes/' + state.change.get('currentChange')}>
             <div className='up-button file-up'>
               Up
             </div>
           </Link>
         </div>
         <div className='header-body'>
-          <ReviewFileDiff diff={this.props.state.file.get('fileDetail')} comments={this.comments()} />
+          <ReviewFileDiff {...props}
+            filename={ state.file.get('currentFile') }
+            patchNumber={ this.getPatchNumber(this.props.params.revisionId) }
+            diff={ state.file.get('fileDetail') }
+            comments={this.comments()}
+            changeId={this.props.params.changeId}
+            revisionId={this.props.params.revisionId} />
         </div>
       </div>
     )

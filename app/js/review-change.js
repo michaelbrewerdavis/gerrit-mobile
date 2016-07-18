@@ -137,6 +137,7 @@ function Messages(props, state) {
 class ReviewChange extends React.Component {
   render() {
     const changeDetail = this.props.state.change.get('changeDetail') || Map()
+    const comments = this.props.state.change.get('comments') || Map()
     const currentRevision = changeDetail.getIn(['revisions', changeDetail.get('current_revision')]) || Map()
     const files = currentRevision.get('files') || Map()
     const changeId = changeDetail.get('id')
@@ -157,7 +158,7 @@ class ReviewChange extends React.Component {
             { currentRevision.getIn([ 'commit', 'message' ])}
           </div>
           <FileList files={files} selectFile={this.props.selectFile} changeId={changeId} revision={revisionId} />
-          <Messages changeId={changeId} revision={revisionId} messages={changeDetail.get('messages')} comments={changeDetail.get('comments')} />
+          <Messages changeId={changeId} revision={revisionId} messages={changeDetail.get('messages')} comments={comments} />
         </div>
       </div>
     )

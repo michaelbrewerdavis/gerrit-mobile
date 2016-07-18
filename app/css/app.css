@@ -194,6 +194,14 @@ body {
   width: 100%;
 }
 
+.comment-draft {
+  font-style: italic;
+}
+
+.comment-edit-textarea {
+  width: 100%;
+  resize: none;
+}
 
 .file {
   display: flex;

@@ -1,9 +1,11 @@
-import { routerReducer } from 'react-router-redux'
-import { createAction, handleActions } from 'redux-actions'
+import { routerReducer as routing } from 'react-router-redux'
+import { handleActions } from 'redux-actions'
 import { combineReducers } from 'redux'
+import { combineReducers as combineReducers_Immutable } from 'redux-immutable'
 import Immutable, { Map } from 'immutable'
+import commentReducers from './reducers/comments'
 
-const appReducer = handleActions({
+const app = handleActions({
   setLoading: (state, action) => {
     return state.set('isLoading', action.payload)
   },
@@ -15,24 +17,32 @@ const appReducer = handleActions({
   }
 }, Map())
 
-const dashboard = handleActions({
+const user = handleActions({
   setUserData: (state, action) => {
-    return state.set('userData', action.payload)
-  },
+    return action.payload
+  }
+}, Map())
+
+const dashboard = handleActions({
   setChanges: (state, action) => {
     return state.set('changes', action.payload)
   }
 }, Map())
 
-const change = handleActions({
-  currentChange: (state, action) => {
-    return state.set('currentChange', action.payload)
-  },
-  setChangeDetail: (state, action) => {
-    return state
-      .set('changeDetail', action.payload)
-      .set('selectedRevision', action.payload.get('current_revision'))
-  }
+const change = combineReducers_Immutable({
+  comments: commentReducers,
+
+  currentChange: handleActions({
+    currentChange: (state, action) => action.payload
+  }, Map()),
+
+  changeDetail: handleActions({
+    setChangeDetail: (state, action) => action.payload
+  }, Map()),
+
+  selectedRevision: handleActions({
+    setChangeDetail: (state, action) => action.payload.get('current_revision')
+  }, '')
 }, Map())
 
 const file = handleActions({
@@ -45,9 +55,10 @@ const file = handleActions({
 }, Map())
 
 export const reducers = combineReducers({
-  app: appReducer,
+  app,
+  user,
   dashboard,
   change,
   file,
-  routing: routerReducer
+  routing
 })

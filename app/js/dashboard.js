@@ -64,7 +64,7 @@ function DashboardHeader(props, state) {
         Dashboard
       </div>
       <div className='dashboard-error'>{props.state.app.get('error')}</div>
-      <User user={props.state.dashboard.get('userData')} />
+      <User user={props.state.user} />
     </div>
   )
 }
