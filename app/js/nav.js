@@ -4,23 +4,22 @@ import { Link } from 'react-router'
 
 import actions from './actions'
 
-export function glyph(name) {
-  const className = 'glyphicon glyphicon-' + name
+export function Glyph(props) {
+  const className = 'glyphicon glyphicon-' + props.name
   return (
     <span className={className} />
   )
 }
-export function makeLink(location, content = 'Link') {
+
+export function NavButton(props) {
   return (
-    <Link
-      className='btn btn-primary btn-outline navbar-btn'
-      to={location}>
-      {content}
+    <Link className='btn btn-primary btn-outline navbar-btn' to={props.location}>
+      { props.children }
     </Link>
   )
 }
 
-function User(props, state) {
+function User(props) {
   let fragment = []
   if (props.state && props.state.user) {
     fragment = [
@@ -53,8 +52,8 @@ export class Header extends React.Component {
               </div>
               <div className='pull-right'>
                 <div className='dropdown'>
-                  <button style={{backgroundColor: '#FFF'}}
-                    className='btn btn-primary btn-outline navbar-btn dropdown-toggle' type='button' data-toggle='dropdown'>
+                  <button type='button' data-toggle='dropdown'
+                    className='btn btn-primary navbar-btn dropdown-toggle'>
                     <span className='glyphicon glyphicon-menu-hamburger'></span>
                   </button>
                   <ul className='dropdown-menu pull-right'>
@@ -82,11 +81,4 @@ export function Footer(props, state) {
       </div>
     </nav>
   )
-}
-
-export default {
-  glyph,
-  makeLink,
-  Header,
-  Footer
 }

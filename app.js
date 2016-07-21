@@ -31,7 +31,8 @@ api.all('/*', apiProxy.web.bind(apiProxy))
 
 const auth = express()
 const authProxy = createProxy()
-auth.use('/login', function(req, res, next) {
+
+auth.use('/logout', function(req, res, next) {
   req.session.regenerate(next)
 })
 

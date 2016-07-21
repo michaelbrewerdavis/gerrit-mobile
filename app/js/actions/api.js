@@ -23,7 +23,7 @@ function api(prefix = '') {
         .fail((error) => {
           if (error.status === 444) {
             const headers = options.headers ? options.headers : {}
-            headers['X-GerritMobileRetry'] = 1
+            headers['x-gerrit-intercept-challenge'] = 1
             options.headers = headers
             return api(prefix).request(path, options)
             .then((response) => {

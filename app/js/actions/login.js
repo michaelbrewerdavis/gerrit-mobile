@@ -92,17 +92,26 @@ export function login() {
 
 export function logout() {
   return (dispatch) => {
+    dispatch(actions.setLoading(true))
     dispatch(actions.clearData())
-    return api.auth.request('/login', {
-      headers: {
-        authorization: 'Basic 0000'
-      }
+    return api.auth.request('/logout')
+    // eslint-disable-next-line handle-callback-err
+    .catch((error) => {
+      // expect redirect error here
     })
-    .catch((err) => {
-      if (err.statusCode !== 401) {
-        throw err
-      }
+    .then(() => {
+      return api.auth.request('/', {
+        username: 'xxx',
+        password: 'xxx',
+        headers: { 'Authorization': 'Basic xxx' }
+      })
     })
-    .then(() => dispatch(login()))
+    // eslint-disable-next-line handle-callback-err
+    .catch((error) => {
+      // expect 401 error here
+    })
+    .then(() => {
+      window.location.reload()
+    })
   }
 }

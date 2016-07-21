@@ -8,7 +8,7 @@ import thunk from 'redux-thunk'
 import Immutable, { Map } from 'immutable'
 import $ from 'jquery'
 import actions from './actions'
-import * as nav from './footer'
+import * as nav from './nav'
 
 require('../css/app.css')
 
@@ -59,7 +59,7 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div id='dashboard'>
-        <DashboardHeader state={this.props.state} />
+        <DashboardHeader { ...this.props } />
         <Changes
           label='My changes'
           changes={this.props.state.dashboard.getIn(['changes', 'outgoing'])}

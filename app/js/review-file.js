@@ -5,7 +5,7 @@ import actions from './actions'
 import { Link } from 'react-router'
 import { immutableFromJS } from './helpers'
 import autosize from 'autosize'
-import nav from './footer'
+import * as nav from './nav'
 
 require('../css/app.css')
 
@@ -352,16 +352,18 @@ class ReviewFile extends React.Component {
             revisionId={this.props.params.revisionId} />
         </div>
         <nav.Footer {...this.props} leftNav={
-          nav.makeLink(
-            this.parentLocation(),
-            nav.glyph('chevron-up'))
+          <nav.NavButton location={this.parentLocation()}>
+            <nav.Glyph name='chevron-up' />
+          </nav.NavButton>
         } rightNav={[
-          nav.makeLink(
-            this.nextLocation(-1),
-            [nav.glyph('chevron-left'), nav.glyph('chevron-left')]),
-          nav.makeLink(
-            this.nextLocation(1),
-            [nav.glyph('chevron-right'), nav.glyph('chevron-right')])
+          <nav.NavButton location={this.nextLocation(-1)} key='left'>
+            <nav.Glyph name='chevron-left' />
+            <nav.Glyph name='chevron-left' />
+          </nav.NavButton>,
+          <nav.NavButton location={this.nextLocation(1)} key='right'>
+            <nav.Glyph name='chevron-right' />
+            <nav.Glyph name='chevron-right' />
+          </nav.NavButton>
         ]} />
       </div>
     )

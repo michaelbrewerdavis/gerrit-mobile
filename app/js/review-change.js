@@ -8,7 +8,7 @@ import Immutable, { List, Map } from 'immutable'
 import $ from 'jquery'
 import { Link } from 'react-router'
 import actions from './actions'
-import * as nav from './footer'
+import * as nav from './nav'
 
 require('../css/app.css')
 
@@ -159,14 +159,15 @@ class ReviewChange extends React.Component {
           <Messages changeId={changeId} revision={revisionId} messages={changeDetail.get('messages')} comments={comments} />
         </div>
         <nav.Footer {...this.props} leftNav={
-          nav.makeLink(
-            this.parentLocation(),
-            nav.glyph('chevron-up'))
-        } rightNav={[
-          nav.makeLink(
-            this.firstChildLocation(),
-            [nav.glyph('chevron-right'), nav.glyph('chevron-right')])
-        ]} />
+          <nav.NavButton location={this.parentLocation()}>
+            <nav.Glyph name='chevron-up' />
+          </nav.NavButton>
+        } rightNav={
+          <nav.NavButton location={this.firstChildLocation()}>
+            <nav.Glyph name='chevron-right' />
+            <nav.Glyph name='chevron-right' />
+          </nav.NavButton>
+        } />
       </div>
     )
   }
