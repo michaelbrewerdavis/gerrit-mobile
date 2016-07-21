@@ -5,4 +5,5 @@ client/public/js/generated/
 **/*.log
 **/generated
 .gitmodules
+**/.DS_Store
 deploy

@@ -1,68 +1,29 @@
 import { createAction } from 'redux-actions'
 import Immutable from 'immutable'
 import $ from 'jquery'
+import { hashHistory } from 'react-router'
 import { immutableFromJS } from './helpers'
 import * as commentActions from './actions/comments'
 import basicActions from './actions/basic'
-import { makeAPICall, loadErrorHandler } from './actions/api'
+import api, { loadErrorHandler } from './actions/api'
+import * as loginActions from './actions/login'
 
-export const actions = {
+const actions = {
   ...commentActions,
   ...basicActions,
-  login,
+  ...loginActions,
   loadDashboard,
   loadChange,
   loadFile
 }
-
-function login() {
-  return (dispatch, getState) => {
-    if (!getState().user.isEmpty()) {
-      return Promise.resolve()
-    }
-    dispatch(actions.setLoading(true))
-
-    return makeAPICall('/auth/login', {}, '')
-    .catch( (error) => {
-      // ignore non-auth login error - may be CORS error on redirect
-      if (error.status !== 401 && error.status !== 403) {
-        console.log(error)
-      } else {
-        dispatch(actions.setDashboardError(true))
-        throw error
-      }
-    })
-    .then( () => {
-      return Promise.all([
-        makeAPICall('/auth/accounts/self/', {}, ''),
-        makeAPICall('/auth/accounts/self/password.http', {}, '')
-      ])
-    })
-    .then( (responses) => {
-      const user = responses[0]
-      const digestPassword = responses[1]
-      dispatch(actions.setUserData( immutableFromJS(user) ))
-
-      return makeAPICall('/auth/store', {
-        method: 'POST',
-        data: {
-          username: user.username,
-          password: digestPassword
-        }
-      }, '')
-    })
-    .then( () => {
-      dispatch(actions.setLoading(false))
-    })
-  }
-}
+export default actions
 
 function loadDashboard() {
   return (dispatch, getState) => {
-    actions.login()(dispatch, getState)
+    return dispatch(actions.login())
     .then( () => {
       dispatch(actions.setLoading(true))
-      return makeAPICall('/changes/?q=is:open+owner:self&q=is:open+reviewer:self+-owner:self&o=LABELS&o=DETAILED_ACCOUNTS')
+      return api.data.request('/changes/?q=is:open+owner:self&q=is:open+reviewer:self+-owner:self&o=LABELS&o=DETAILED_ACCOUNTS')
     })
     .then( (response) => {
       dispatch(actions.setChanges(immutableFromJS({
@@ -73,30 +34,35 @@ function loadDashboard() {
       dispatch(actions.setLoading(false))
     })
     .catch( (error) => {
-      loadErrorHandler(dispatch)(error)
       dispatch(actions.setDashboardError(true))
+      loadErrorHandler(dispatch)(error)
     })
   }
 }
 
 function loadChange(changeId) {
   return (dispatch, getState) => {
-    if (getState().change.get('currentChange') === changeId) {
-      return Promise.resolve('already loaded')
-    }
-    dispatch(actions.currentChange( changeId ))
-    dispatch(actions.setLoading(true))
-    return Promise.all([
-      makeAPICall('/changes/' + changeId + '/detail?o=CURRENT_REVISION&o=CURRENT_COMMIT&o=ALL_FILES'),
-      makeAPICall('/changes/' + changeId + '/comments'),
-      dispatch(actions.loadDraftComments(changeId))
-    ])
+    return dispatch(actions.login())
+    .then( () => {
+      if (getState().change.get('currentChange') === changeId) {
+        return Promise.resolve()
+      }
+      dispatch(actions.currentChange( changeId ))
+      dispatch(actions.setLoading(true))
+      return Promise.all([
+        api.data.request('/changes/' + changeId + '/detail?o=CURRENT_REVISION&o=CURRENT_COMMIT&o=ALL_FILES'),
+        api.data.request('/changes/' + changeId + '/comments'),
+        dispatch(actions.loadDraftComments(changeId))
+      ])
+    })
     .then( (responses) => {
-      const changeDetail = responses[0]
-      const comments = responses[1]
+      if (responses) {
+        const changeDetail = responses[0]
+        const comments = responses[1]
 
-      dispatch(actions.setChangeDetail( immutableFromJS(changeDetail) ))
-      dispatch(actions.setComments( immutableFromJS(comments) ))
+        dispatch(actions.setChangeDetail( immutableFromJS(changeDetail) ))
+        dispatch(actions.setComments( immutableFromJS(comments) ))
+      }
       dispatch(actions.setLoading(false))
     })
     .catch(loadErrorHandler(dispatch))
@@ -112,10 +78,9 @@ function loadFile(change, revision, fileId) {
     loadChange(change)(dispatch, getState)
     .then( (response) => {
       dispatch(actions.setLoading(true))
-      return makeAPICall('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
+      return api.data.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
     })
     .then( (response) => {
-      console.log(response)
       dispatch(actions.setFileDetail( immutableFromJS(response) ))
       dispatch(actions.setLoading(false))
     })

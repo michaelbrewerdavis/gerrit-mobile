@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions'
-import { makeAPICall, loadErrorHandler } from './api'
+import api, { loadErrorHandler } from './api'
 import { immutableFromJS } from '../helpers'
 
 export const setComments = createAction('setComments')
@@ -18,7 +18,7 @@ export function deleteComment(changeId, revisionId, comment) {
     if (comment.get('is_new')) {
       return
     }
-    return makeAPICall('/changes/' + changeId + '/revisions/' + revisionId + '/drafts/' + comment.get('id'), {
+    return api.data.request('/changes/' + changeId + '/revisions/' + revisionId + '/drafts/' + comment.get('id'), {
       method: 'DELETE'
     })
     .then(() => dispatch(loadDraftComments(changeId)))
@@ -36,7 +36,7 @@ export function saveComment(changeId, revisionId, comment) {
     } else {
       url = '/changes/' + changeId + '/revisions/' + revisionId + '/drafts/' + comment.get('id')
     }
-    return makeAPICall(url, {
+    return api.data.request(url, {
       method: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -53,7 +53,7 @@ export function saveComment(changeId, revisionId, comment) {
 
 export function loadDraftComments(changeId) {
   return (dispatch, getState) => {
-    makeAPICall('/changes/' + changeId + '/drafts')
+    api.data.request('/changes/' + changeId + '/drafts')
     .then( (response) => {
       dispatch(setDraftComments( immutableFromJS(response) ))
     })

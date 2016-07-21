@@ -37,7 +37,7 @@ auth.use('/login', function(req, res, next) {
 
 auth.post('/store', bodyParser.urlencoded(), function(req, res) {
   req.session.credentials = req.body
-  res.send('OK')
+  res.send({ result: 'OK' })
 })
 
 auth.all('/*', authProxy.web.bind(authProxy))
@@ -57,13 +57,13 @@ function createProxy() {
 
   if (process.env.LOG_REQUESTS) {
     apiProxy.on('error', function(err, req, res) {
-      console.log('error: ' + req.url + '\n' + err.stack)
+      console.log('error: ' + req.url + '\n' + err.stack) // eslint-disable-line no-console
     })
-    apiProxy.on('proxyReq', function (proxyReq, req, res, options) {
-      console.log('request', req.method, req.url, req.headers)
-    });
+    apiProxy.on('proxyReq', function(proxyReq, req, res, options) {
+      console.log('request', req.method, req.url, req.headers)// eslint-disable-line no-console
+    })
     apiProxy.on('proxyRes', (proxyRes, req, res) => {
-      console.log('response', proxyRes.statusCode, proxyRes.headers)
+      console.log('response', proxyRes.statusCode, proxyRes.headers) // eslint-disable-line no-console
     })
   }
   return apiProxy

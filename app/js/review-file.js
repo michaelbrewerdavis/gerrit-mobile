@@ -1,10 +1,11 @@
 import React from 'react'
 import { Map, List } from 'immutable'
 import { connect } from 'react-redux'
-import { actions } from './actions'
+import actions from './actions'
 import { Link } from 'react-router'
 import { immutableFromJS } from './helpers'
 import autosize from 'autosize'
+import nav from './footer'
 
 require('../css/app.css')
 
@@ -44,7 +45,14 @@ class Comment extends React.Component {
   }
 
   replyToComment() {
-    this.props.replyToComment(this.props.comment)
+    this.props.addComment({
+      filename: this.props.filename,
+      path: this.props.filename,
+      line: this.props.comment.get('line'),
+      patch_set: this.props.comment.get('patch_set'),
+      in_reply_to: this.props.comment.get('id'),
+      editing: true
+    })
   }
 
   saveComment() {
@@ -61,23 +69,23 @@ class Comment extends React.Component {
     if (this.props.type === 'draft') {
       if (this.isEditing()) {
         return (
-          <div>
-            <input type='button' onClick={this.saveComment} value='Save' />
-            <input type='button' onClick={this.cancelEdit} value='Cancel' />
+          <div className='action-bar'>
+            <input type='button' onClick={this.saveComment} value='Save' className='btn btn-primary btn-sm btn-standard navbar-btn dropdown-toggle' />
+            <input type='button' onClick={this.cancelEdit} value='Cancel' className='btn btn-primary btn-sm btn-standard navbar-btn dropdown-toggle' />
           </div>
         )
       } else {
         return (
-          <div>
-            <input type='button' onClick={this.editComment} value='Edit' />
-            <input type='button' onClick={this.deleteComment} value='Delete' />
+          <div className='action-bar'>
+            <input type='button' onClick={this.editComment} value='Edit' className='btn btn-primary btn-sm btn-standard navbar-btn dropdown-toggle' />
+            <input type='button' onClick={this.deleteComment} value='Delete' className='btn btn-primary btn-sm btn-standard navbar-btn dropdown-toggle' />
           </div>
         )
       }
     } else {
       return (
-        <div>
-          <input type='button' onClick={this.replyToComment} value='Reply' />
+        <div className='action-bar'>
+          <input type='button' onClick={this.replyToComment} value='Reply' className='btn btn-primary btn-sm btn-standard navbar-btn dropdown-toggle' />
         </div>
       )
     }
@@ -143,10 +151,12 @@ function getCommentsForLine(props, type) {
     </div>
   )
 }
+
 function DiffLine(props) {
+  const onClick = props.addComment.bind(null, { editing: true, filename: props.filename, path: props.filename, line: props.lineNumber, patch_set: props.patchNumber })
   return (
     <div>
-      <div className={props.style} onClick={props.addComment.bind(null, { filename: props.filename, path: props.filename, line: props.lineNumber, patch_set: props.patchNumber })}>
+      <div className={props.style} onClick={onClick}>
         <div className='line-number'>{props.lineNumber}</div>
         <div className='line-content'>{props.line}</div>
       </div>
@@ -294,13 +304,35 @@ class ReviewFile extends React.Component {
     })
   }
 
+  parentLocation() {
+    return '/changes/' + this.props.state.change.get('currentChange')
+  }
+
+  nextLocation(offset) {
+    const files = this.props.state.change.getIn([
+      'changeDetail',
+      'revisions',
+      this.props.params.revisionId,
+      'files'])
+    if (files) {
+      const currentFile = this.props.state.file.get('currentFile')
+      const filenames = files.keySeq()
+      const index = filenames.indexOf(currentFile)
+      const newIndex = index + offset
+      if (newIndex >= 0 && newIndex < filenames.size) {
+        return '/changes/' + this.props.state.change.get('currentChange') +
+          '/revisions/' + this.props.params.revisionId +
+          '/files/' + filenames.get(newIndex)
+      }
+    }
+    return this.parentLocation()
+  }
+
   render() {
     const { state, ...props } = this.props
-
-    console.log(this.comments().toJS())
     return (
-      <div className='file'>
-        <div className='header file-header'>
+      <div className='file has-footer'>
+        <nav.Header {...this.props} content={
           <div className='file-header-info'>
             <div className='header-title file-header-change'>
               { state.change.getIn(['changeDetail', 'subject']) }
@@ -309,12 +341,7 @@ class ReviewFile extends React.Component {
               { state.file.get('currentFile')}
             </div>
           </div>
-          <Link to={'/changes/' + state.change.get('currentChange')}>
-            <div className='up-button file-up'>
-              Up
-            </div>
-          </Link>
-        </div>
+        } />
         <div className='header-body'>
           <ReviewFileDiff {...props}
             filename={ state.file.get('currentFile') }
@@ -324,11 +351,23 @@ class ReviewFile extends React.Component {
             changeId={this.props.params.changeId}
             revisionId={this.props.params.revisionId} />
         </div>
+        <nav.Footer {...this.props} leftNav={
+          nav.makeLink(
+            this.parentLocation(),
+            nav.glyph('chevron-up'))
+        } rightNav={[
+          nav.makeLink(
+            this.nextLocation(-1),
+            [nav.glyph('chevron-left'), nav.glyph('chevron-left')]),
+          nav.makeLink(
+            this.nextLocation(1),
+            [nav.glyph('chevron-right'), nav.glyph('chevron-right')])
+        ]} />
       </div>
     )
   }
 
-  componentDidMount() {
+  checkCurrentFile() {
     const changeId = this.props.params.changeId
     const revisionId = this.props.params.revisionId
     const fileName = this.props.params.fileName
@@ -339,6 +378,14 @@ class ReviewFile extends React.Component {
     if (changeId !== loadedChangeId || fileName !== loadedFileName) {
       this.props.loadFile(changeId, revisionId, fileName)
     }
+  }
+
+  componentDidMount() {
+    this.checkCurrentFile()
+  }
+
+  componentDidUpdate() {
+    this.checkCurrentFile()
   }
 }
 

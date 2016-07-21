@@ -7,7 +7,8 @@ import thunk from 'redux-thunk'
 import Immutable, { List, Map } from 'immutable'
 import $ from 'jquery'
 import { Link } from 'react-router'
-import { actions } from './actions'
+import actions from './actions'
+import * as nav from './footer'
 
 require('../css/app.css')
 
@@ -145,14 +146,11 @@ class ReviewChange extends React.Component {
 
     return (
       <div className='change'>
-        <div className='header change-header'>
-          <div className='header-title change-header-title'>
+        <nav.Header {...this.props} content={
+          <div className='file-name file-header-info'>
             {changeDetail.get('_number')} -- {changeDetail.get('subject')}
           </div>
-          <Link to='/'>
-            <div className='up-button change-return-to-dashboard'>Up</div>
-          </Link>
-        </div>
+        } />
         <div className='body change-body'>
           <div className='section change-commit-message'>
             { currentRevision.getIn([ 'commit', 'message' ])}
@@ -160,8 +158,36 @@ class ReviewChange extends React.Component {
           <FileList files={files} selectFile={this.props.selectFile} changeId={changeId} revision={revisionId} />
           <Messages changeId={changeId} revision={revisionId} messages={changeDetail.get('messages')} comments={comments} />
         </div>
+        <nav.Footer {...this.props} leftNav={
+          nav.makeLink(
+            this.parentLocation(),
+            nav.glyph('chevron-up'))
+        } rightNav={[
+          nav.makeLink(
+            this.firstChildLocation(),
+            [nav.glyph('chevron-right'), nav.glyph('chevron-right')])
+        ]} />
       </div>
     )
+  }
+
+  parentLocation() {
+    return '/'
+  }
+
+  firstChildLocation() {
+    const files = this.props.state.change.getIn([
+      'changeDetail',
+      'revisions',
+      this.props.state.change.get('selectedRevision'),
+      'files'])
+    if (files) {
+      const filename = files.keySeq().first()
+      return '/changes/' + this.props.state.change.get('currentChange') +
+        '/revisions/' + this.props.state.change.get('selectedRevision') +
+        '/files/' + filename
+    }
+    return '/'
   }
 
   componentDidMount() {

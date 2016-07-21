@@ -1,41 +1,49 @@
 import $ from 'jquery'
 import actions from './basic'
 
-export function makeAPICall(path, options = {}, prefix = '/api/a') {
-  return new Promise((resolve, reject) => {
-    $.ajax($.extend({
-      url: prefix + path,
-      dataType: 'json',
-      dataFilter: (data) => {
-        return data.substr(data.indexOf('\n') + 1)
-      }
-    }, options))
-    .done((response) => {
-      resolve(response)
-    })
-    .fail((error) => {
-      if (error.status === 444) {
-        const headers = options.headers ? options.headers : {}
-        headers['X-GerritMobileRetry'] = 1
-        options.headers = headers
-        return makeAPICall(path, options, prefix)
-        .then((response) => {
+export default {
+  auth: api('/auth'),
+  data: api('/api/a')
+}
+
+function api(prefix = '') {
+  return {
+    request: (path, options = {}) => {
+      return new Promise((resolve, reject) => {
+        $.ajax($.extend({
+          url: prefix + path,
+          dataType: 'json',
+          dataFilter: (data) => {
+            return data.substr(data.indexOf('\n') + 1)
+          }
+        }, options))
+        .done((response) => {
           resolve(response)
         })
-        .catch((error) => {
-          reject(error)
+        .fail((error) => {
+          if (error.status === 444) {
+            const headers = options.headers ? options.headers : {}
+            headers['X-GerritMobileRetry'] = 1
+            options.headers = headers
+            return api(prefix).request(path, options)
+            .then((response) => {
+              resolve(response)
+            })
+            .catch((error) => {
+              reject(error)
+            })
+          } else {
+            reject(error)
+          }
         })
-      } else {
-        reject(error)
-      }
-    })
-  })
+      })
+    }
+  }
 }
 
 export function loadErrorHandler(dispatch) {
   return (error) => {
-    console.log('error')
-    console.log(error)
+    console.log('error', error) // eslint-disable-line no-console
     dispatch(actions.setError(error.message || error.statusText))
     dispatch(actions.currentChange(null))
     dispatch(actions.currentFile(null))

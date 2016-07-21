@@ -4,10 +4,10 @@
   "description": "Mobile view of Gerrit code review",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node app.js",
     "dev": "npm run start & webpack-dev-server -d --progress --colors --content-base public/",
     "dev2": "webpack-dev-server -d --progress --colors --content-base public/",
-    "lint": "eslint --ext .js app app.js",
+    "lint": "eslint --ext .js app app.js server",
     "pack": "webpack -d --progress --colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

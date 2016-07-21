@@ -1,10 +1,12 @@
 **/generated
 **/*.example
 **/*.log
+**/DS_Store
 node_modules
 
 .git
 .gitignore
+.gitmodules
 .dockerignore
 Dockerfile
 docker-compose.yml

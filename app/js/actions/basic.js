@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions'
 
 export default {
+  clearData: createAction('clearData'),
   setLoading: createAction('setLoading'),
   setDashboardError: createAction('setDashboardError'),
   setError: createAction('setError'),

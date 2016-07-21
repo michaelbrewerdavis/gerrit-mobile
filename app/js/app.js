@@ -10,6 +10,7 @@ import Chrome from './chrome'
 import Dashboard from './dashboard'
 import ReviewChange from './review-change'
 import ReviewFile from './review-file'
+import CreatePassword from './create-password'
 import { reducers } from './reducers'
 
 require('../css/app.css')
@@ -30,6 +31,7 @@ ReactDOM.render(
     <Router history={history}>
       <Route path='/' component={Chrome}>
         <IndexRoute component={Dashboard} />
+        <Route path='createPassword' component={CreatePassword} />
         <Route path='changes/:changeId'>
           <IndexRoute component={ReviewChange} />
           <Route path='revisions/:revisionId'>

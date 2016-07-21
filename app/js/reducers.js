@@ -1,9 +1,11 @@
 import { routerReducer as routing } from 'react-router-redux'
 import { handleActions } from 'redux-actions'
 import { combineReducers } from 'redux'
-import { combineReducers as combineReducers_Immutable } from 'redux-immutable'
+import { combineReducers as combineReducersImmutable } from 'redux-immutable'
 import Immutable, { Map } from 'immutable'
 import commentReducers from './reducers/comments'
+
+const clearData = () => Map()
 
 const app = handleActions({
   setLoading: (state, action) => {
@@ -14,22 +16,25 @@ const app = handleActions({
   },
   setError: (state, action) => {
     return state.set('error', action.payload)
-  }
+  },
+  clearData
 }, Map())
 
 const user = handleActions({
   setUserData: (state, action) => {
     return action.payload
-  }
+  },
+  clearData
 }, Map())
 
 const dashboard = handleActions({
   setChanges: (state, action) => {
     return state.set('changes', action.payload)
-  }
+  },
+  clearData
 }, Map())
 
-const change = combineReducers_Immutable({
+const change = combineReducersImmutable({
   comments: commentReducers,
 
   currentChange: handleActions({
@@ -41,8 +46,12 @@ const change = combineReducers_Immutable({
   }, Map()),
 
   selectedRevision: handleActions({
-    setChangeDetail: (state, action) => action.payload.get('current_revision')
-  }, '')
+    setChangeDetail: (state, action) => {
+      return action.payload.get('current_revision')
+    }
+  }, ''),
+
+  clearData
 }, Map())
 
 const file = handleActions({
@@ -51,7 +60,8 @@ const file = handleActions({
   },
   setFileDetail: (state, action) => {
     return state.set('fileDetail', action.payload)
-  }
+  },
+  clearData
 }, Map())
 
 export const reducers = combineReducers({

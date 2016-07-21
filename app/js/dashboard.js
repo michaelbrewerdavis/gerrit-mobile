@@ -7,7 +7,8 @@ import { createAction, handleActions } from 'redux-actions'
 import thunk from 'redux-thunk'
 import Immutable, { Map } from 'immutable'
 import $ from 'jquery'
-import { actions } from './actions'
+import actions from './actions'
+import * as nav from './footer'
 
 require('../css/app.css')
 
@@ -42,30 +43,15 @@ function Changes(props, state) {
     </div>
   )
 }
-function User(props, state) {
-  let fragment = []
-  if (props.user) {
-    fragment = [
-      <div className='user-username' key='user'>{props.user.get('username')}</div>,
-      <img className='user-avatar' key='avatar' src={props.user.getIn(['avatars', 0, 'url'])} />
-    ]
-  }
-  return (
-    <div className='user'>
-      {fragment}
-    </div>
-  )
-}
 
 function DashboardHeader(props, state) {
   return (
-    <div id='dashboard-header'>
-      <div className='dashboard-header-title' onClick={props.loadDashboard}>
+    <nav.Header {...props} content={
+      <div className='file-name file-header-info'>
         Dashboard
+        <div className='dashboard-error'>{props.state.app.get('error')}</div>
       </div>
-      <div className='dashboard-error'>{props.state.app.get('error')}</div>
-      <User user={props.state.user} />
-    </div>
+    } />
   )
 }
 
@@ -73,7 +59,7 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div id='dashboard'>
-        <DashboardHeader loadDashboard={this.props.loadDashboard} state={this.props.state} />
+        <DashboardHeader state={this.props.state} />
         <Changes
           label='My changes'
           changes={this.props.state.dashboard.getIn(['changes', 'outgoing'])}
