@@ -1,8 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
 import { Link } from 'react-router'
-
-import actions from './actions'
 
 export function Glyph(props) {
   const className = 'glyphicon glyphicon-' + props.name
@@ -43,11 +40,11 @@ export class Header extends React.Component {
 
   render() {
     return (
-      <nav className='navbar navbar-default navbar-fixed-top'>
+      <nav className='navbar navbar-fixed-top bg-primary'>
         <div className='container fill'>
           <div className='bg-primary fill'>
             <div className='container header'>
-              <div className='fill'>
+              <div className='fill truncate-text'>
                 { this.props.content }
               </div>
               <div className='pull-right'>
@@ -73,7 +70,7 @@ export class Header extends React.Component {
 export function Footer(props, state) {
   return (
     <nav className='navbar navbar-default navbar-fixed-bottom'>
-      <div className='container navbar-header footer'>
+      <div className='container'>
         { props.leftNav }
         <div className='pull-right'>
           { props.rightNav }

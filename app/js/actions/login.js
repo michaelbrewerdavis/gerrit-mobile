@@ -1,10 +1,6 @@
-import { createAction } from 'redux-actions'
-import Immutable from 'immutable'
-import $ from 'jquery'
-import { push } from 'react-router-redux'
 import { immutableFromJS } from '../helpers'
 import actions from './basic'
-import api, { loadErrorHandler } from './api'
+import api from './api'
 import { hashHistory } from 'react-router'
 
 function authenticate() {

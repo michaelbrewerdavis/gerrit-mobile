@@ -1,14 +1,12 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-import { createStore, applyMiddleware } from 'redux'
-import { connect, Provider } from 'react-redux'
-import { createAction, handleActions } from 'redux-actions'
-import thunk from 'redux-thunk'
-import Immutable, { List, Map } from 'immutable'
-import $ from 'jquery'
-import { Link } from 'react-router'
+import { connect } from 'react-redux'
+import { Map, List } from 'immutable'
+
 import actions from './actions'
 import * as nav from './nav'
+import FileList from './components/change-file-list'
+import MessageList from './components/change-message-list'
+import StatusLabels from './components/status-labels'
 
 require('../css/app.css')
 
@@ -16,126 +14,82 @@ function pathToFile(changeId, revisionId, filename) {
   return '/changes/' + changeId + '/revisions/' + revisionId + '/files/' + encodeURIComponent(filename)
 }
 
-function FileListItem(props, state) {
-  return (
-    <Link to={pathToFile(props.changeId, props.revision, props.filename)}>
-      <div className='file-list-item'>
-        <div className='file-list-item-name'>{props.filename}</div>
-      </div>
-    </Link>
-  )
-}
-
-function FileList(props, state) {
-  let files = props.files || Map()
-  files = files.sortBy((value, key) => key)
-  return (
-    <div className='section file-list'>
-    {
-      files.map((value, key) => {
-        return <FileListItem key={key} filename={key} attrs={value}
-          selectFile={props.selectFile}
-          changeId={props.changeId}
-          revision={props.revision} />
-      }).valueSeq().toArray()
-    }
-    </div>
-  )
-}
-
-class Message extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { expanded: false }
-    this.messageBody = this.props.message.get('message')
-    this._toggleState = this.toggleState.bind(this)
-
-    let lines = this.messageBody.split('\n\n')
-    if (lines.length > 1) {
-      this.firstLine = lines.slice(0, 2).join(' ')
-      this.rest = lines.slice(2).join('\n')
-    } else {
-      this.firstLine = this.messageBody
-      this.rest = ''
-    }
+class ActionBar extends React.Component {
+  constructor() {
+    super()
+    this.postReview = this.postReview.bind(this)
   }
 
-  toggleState() {
-    this.setState({ expanded: !this.state.expanded })
+  postReview() {
+    this.props.postReview(
+      this.props.change.get('change_id'),
+      this.props.change.get('current_revision'),
+      this.refs.replyText.value
+    )
   }
 
-  getExpanded() {
-    if (this.state.expanded) {
+  statusRow(key, label) {
+    let responses = (label.get('all') || List()).filter((resp) => resp.get('value'))
+    if (responses.size === 0) {
+      responses = List([ Map() ])
+    }
+    return responses.map((resp, index) => {
       return (
-        <div className='message-expanded'>
-          <div className='message-expanded-body'>{this.firstLine}<br />{this.rest}</div>
-          {
-            this.props.comments.map((list, file) => (
-              <div className='comment-file'>
-                <Link to={pathToFile(this.props.changeId, this.props.revision, file)}>
-                  <div className='comment-filename'>{file}</div>
-                </Link>
-                {
-                  list.map((comment) => (
-                    <div className='comment-row'>
-                      <div className='comment-line'>{comment.get('line')}</div>
-                      <div className='comment-body'>{comment.get('message')}</div>
-                    </div>
-                  ))
-                }
-              </div>
-            )).valueSeq().toJS()
-          }
-        </div>
+        <tr key={key + index}
+          className={ resp.get('value') > 0 ? 'success' : resp.get('value') < 0 ? 'danger' : null}>
+          <th>{ (index === 0) ? key : ''}</th>
+          <td>{resp.get('value')}</td>
+          <td>{resp.get('username')}</td>
+        </tr>
       )
-    }
+    })
   }
-
   render() {
+    const labels = this.props.change.get('labels') || Map()
     return (
-      <div className='message'>
-        <div className='message-short' onClick={this._toggleState}>
-          <div className='message-author'>{this.props.message.getIn(['author', 'username'])}</div>
-          <div className='message-title'>{this.firstLine}</div>
+      <div className='container action-bar'>
+        <div className='panel panel-white'>
+          <div className='panel-heading detail-row'>
+            <div className='action-bar-heading' role='button' data-toggle='collapse' href='#status-details' aria-expanded='false' aria-controls='status-details'>
+              <StatusLabels size='md' labels={labels} />
+            </div>
+            <button className='btn btn-md btn-primary btn-outline' data-toggle='modal' data-target='#submit-modal'>Reply</button>
+          </div>
+          <div id='status-details' className='panel-collapse collapse' role='tabpanel'>
+            <table className='table table-striped'>
+              <tbody>
+              {
+                labels.map((label, key) => this.statusRow(key, label)).valueSeq()
+              }
+              </tbody>
+            </table>
+          </div>
         </div>
-        { this.getExpanded() }
+        <div className="modal fade" id="submit-modal" tabIndex="-1" role="dialog" aria-labelledby="submit-modal-label">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 className="modal-title" id="submit-modal-label">Reply</h4>
+              </div>
+              <div className="modal-body">
+                <textarea ref='replyText' className='comment-edit-textarea' />
+                ...
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.postReview}>Post</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 }
 
-function commentsForMessage(allComments, message) {
-  const messageTime = message.get('date')
-  const filteredComments = {}
-  allComments.map((list, filename) => {
-    const filteredList = list.filter((comment) => (comment.get('updated') === messageTime))
-    if (filteredList.size > 0) {
-      filteredComments[filename] = filteredList
-    }
-  })
-  return Immutable.fromJS(filteredComments)
-}
-
-function Messages(props, state) {
-  const messages = props.messages || List()
-  return (
-    <div className='section messages'>
-    {
-      messages.map((message) => {
-        return (
-          <Message key={message.get('id')}
-            changeId={props.changeId}
-            revision={props.revision}
-            message={message}
-            comments={commentsForMessage(props.comments, message)} />
-        )
-      }).toArray()
-    }
-    </div>
-  )
-}
-
-class ReviewChange extends React.Component {
+class
+ReviewChange extends React.Component {
   render() {
     const changeDetail = this.props.state.change.get('changeDetail') || Map()
     const comments = this.props.state.change.get('comments') || Map()
@@ -147,16 +101,17 @@ class ReviewChange extends React.Component {
     return (
       <div className='change'>
         <nav.Header {...this.props} content={
-          <div className='file-name file-header-info'>
+          <div className='file-name file-header-info truncate-text'>
             {changeDetail.get('_number')} -- {changeDetail.get('subject')}
           </div>
         } />
         <div className='body change-body'>
-          <div className='section change-commit-message'>
+          <div className='container change-commit-message'>
             { currentRevision.getIn([ 'commit', 'message' ])}
           </div>
+          <ActionBar {...this.props} change={changeDetail} />
           <FileList files={files} selectFile={this.props.selectFile} changeId={changeId} revision={revisionId} />
-          <Messages changeId={changeId} revision={revisionId} messages={changeDetail.get('messages')} comments={comments} />
+          <MessageList changeId={changeId} revision={revisionId} messages={changeDetail.get('messages')} comments={comments} />
         </div>
         <nav.Footer {...this.props} leftNav={
           <nav.NavButton location={this.parentLocation()}>
@@ -184,19 +139,28 @@ class ReviewChange extends React.Component {
       'files'])
     if (files) {
       const filename = files.keySeq().first()
-      return '/changes/' + this.props.state.change.get('currentChange') +
-        '/revisions/' + this.props.state.change.get('selectedRevision') +
-        '/files/' + filename
+      return pathToFile(
+        this.props.state.change.get('currentChange'),
+        this.props.state.change.get('selectedRevision'),
+        filename)
     }
     return '/'
   }
 
-  componentDidMount() {
+  checkCurrentChange() {
     const changeId = this.props.params.changeId
     if (!this.props.state.change.get('changeDetail') ||
       changeId !== this.props.state.change.getIn(['changeDetail', 'id'])) {
       this.props.loadChange(this.props.params.changeId)
     }
+  }
+
+  componentDidMount() {
+    this.checkCurrentChange()
+  }
+
+  componentDidUpdate() {
+    this.checkCurrentChange()
   }
 }
 

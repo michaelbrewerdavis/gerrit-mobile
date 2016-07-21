@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { createStore, compose, applyMiddleware } from 'redux'
-import { connect, Provider } from 'react-redux'
+import { Provider } from 'react-redux'
 import thunk from 'redux-thunk'
-import { Router, Route, IndexRoute, Link, hashHistory } from 'react-router'
+import { Router, Route, IndexRoute, hashHistory } from 'react-router'
 import { syncHistoryWithStore } from 'react-router-redux'
 
 import Chrome from './chrome'

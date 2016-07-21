@@ -9,6 +9,22 @@ body {
   font-family: sans-serif;
 }
 
+.panel-white {
+  background-color: #FFFFFF;
+  border-color: #DDDDDD;
+}
+
+.truncate-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-group .list-group-item:nth-child(even):not(.list-group-item-override) {
+  background-color: #FAFAFA;
+}
+
 .modal.loading-modal {
   display: block;
   background-color: #FFFFFF;
@@ -16,6 +32,14 @@ body {
   display: flex;
   align-items: center;
 
+}
+
+.list-
+.btn-circle.btn-xs {
+  border-radius: 7px;
+  height: 15px;
+  width: 15px;
+  padding: 1px;
 }
 
 .fill {
@@ -28,6 +52,10 @@ body {
   align-items: center;
 }
 
+.flex-spacer {
+  flex: 1 1 auto;
+}
+
 .footer {
   box-shadow: 0px 0px 2px #888888;
 }
@@ -37,17 +65,8 @@ body {
   overflow-x: hidden;
 }
 
-#dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-content: center;
-}
-
-.dashboard-header-title {
-  font-weight: bold;
-  display: flex;
-  text-align: center;
-  vertical-align: middle;
+.dashboard-content {
+  padding-top: 10px;
 }
 
 .dashboard-header-error {
@@ -74,6 +93,15 @@ body {
   align-content: flex-start;
 }
 
+.panel-super .panel-heading {
+  background-color: #d9edf7;
+}
+
+.panel-heading-small {
+  height: 28px;
+  padding: 2px 15px;
+}
+
 .dashboard-changes-label {
   margin-top: 20px;
   margin-bottom: 5px;
@@ -84,13 +112,6 @@ body {
   background-color: #eee;
 }
 
-.dashboard-change {
-  border: solid #aaa 1px;
-  border-radius: 6px;
-  margin: 5px;
-  margin-bottom: 10px;
-}
-
 .dashboard-change-subject {
   padding: 3px;
   overflow: hidden;
@@ -98,13 +119,33 @@ body {
   white-space: nowrap;
 }
 
-.dashboard-change-details {
-  font-size: 50%;
+.detail-row {
   display: flex;
+  justify-content: space-between;
 }
 
-.dashboard-change-details > * {
+.dashboard-change-details {
+  font-size: 70%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.dashboard-change-details {
   padding: 2px 3px;
+}
+
+.change-label {
+  margin: 2px;
+}
+
+.dashboard-change-mainline {
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+}
+
+.dashboard-change-icons {
+  flex-shrink: 0;
 }
 
 .change {
@@ -151,24 +192,9 @@ body {
 }
 
 .change-commit-message {
-  padding: 10px 0px 20px;
   font-family: monospace;
   white-space: pre;
   overflow-x: auto;
-}
-
-.file-list-item {
-  padding: 5px;
-  margin: 0px 5px;
-}
-
-.file-list-item-name {
-  padding: 5px;
-  border: solid #aaa 1px;
-  border-radius: 6px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .message {
@@ -185,18 +211,21 @@ body {
 
 .message-author {
   width: 80px;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .message-title {
-  width: 300px;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+
+.message-date {
+  font-size: 70%;
 }
 
 .message-expanded {
@@ -219,13 +248,22 @@ body {
   width: 100%;
 }
 
-.comment-draft {
+.comment-draft .comment-body, .comment-draft .comment-header {
   font-style: italic;
 }
 
 .comment-edit-textarea {
   width: 100%;
   resize: none;
+  border: solid 1px #DDD;
+}
+
+.action-bar-heading {
+  flex: 1 1 auto;
+}
+
+.create-password {
+  margin-top: 12px;
 }
 
 .file {
@@ -239,9 +277,6 @@ body {
 }
 
 .file-header-info {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
   width: 80%;
   padding-left: 15px;
 }

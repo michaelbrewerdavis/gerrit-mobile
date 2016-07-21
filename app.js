@@ -36,6 +36,10 @@ auth.use('/logout', function(req, res, next) {
   req.session.regenerate(next)
 })
 
+auth.get('/createPassword', function(req, res) {
+  res.redirect(process.env.GERRIT_HOST + '#/settings/http-password')
+})
+
 auth.post('/store', bodyParser.urlencoded(), function(req, res) {
   req.session.credentials = req.body
   res.send({ result: 'OK' })

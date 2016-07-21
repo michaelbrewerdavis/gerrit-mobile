@@ -1,7 +1,3 @@
-import { createAction } from 'redux-actions'
-import Immutable from 'immutable'
-import $ from 'jquery'
-import { hashHistory } from 'react-router'
 import { immutableFromJS } from './helpers'
 import * as commentActions from './actions/comments'
 import basicActions from './actions/basic'
@@ -46,24 +42,25 @@ function loadChange(changeId) {
     .then( () => {
       if (getState().change.get('currentChange') === changeId) {
         return Promise.resolve()
-      }
-      dispatch(actions.currentChange( changeId ))
-      dispatch(actions.setLoading(true))
-      return Promise.all([
-        api.data.request('/changes/' + changeId + '/detail?o=CURRENT_REVISION&o=CURRENT_COMMIT&o=ALL_FILES'),
-        api.data.request('/changes/' + changeId + '/comments'),
-        dispatch(actions.loadDraftComments(changeId))
-      ])
-    })
-    .then( (responses) => {
-      if (responses) {
-        const changeDetail = responses[0]
-        const comments = responses[1]
+      } else {
+        dispatch(actions.currentChange( changeId ))
+        dispatch(actions.setLoading(true))
+        return Promise.all([
+          api.data.request('/changes/' + changeId + '/detail?o=CURRENT_REVISION&o=CURRENT_COMMIT&o=ALL_FILES'),
+          api.data.request('/changes/' + changeId + '/comments'),
+          dispatch(actions.loadDraftComments(changeId))
+        ])
+        .then( (responses) => {
+          if (responses) {
+            const changeDetail = responses[0]
+            const comments = responses[1]
 
-        dispatch(actions.setChangeDetail( immutableFromJS(changeDetail) ))
-        dispatch(actions.setComments( immutableFromJS(comments) ))
+            dispatch(actions.setChangeDetail( immutableFromJS(changeDetail) ))
+            dispatch(actions.setComments( immutableFromJS(comments) ))
+          }
+          dispatch(actions.setLoading(false))
+        })
       }
-      dispatch(actions.setLoading(false))
     })
     .catch(loadErrorHandler(dispatch))
   }
@@ -71,18 +68,22 @@ function loadChange(changeId) {
 
 function loadFile(change, revision, fileId) {
   return (dispatch, getState) => {
-    if (getState().change.get('currentChange') === change && getState().file.get('currentFile') === fileId) {
-      return Promise.resolve('already loaded')
-    }
-    dispatch(actions.currentFile( fileId ))
-    loadChange(change)(dispatch, getState)
-    .then( (response) => {
-      dispatch(actions.setLoading(true))
-      return api.data.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
-    })
-    .then( (response) => {
-      dispatch(actions.setFileDetail( immutableFromJS(response) ))
-      dispatch(actions.setLoading(false))
+    return dispatch(actions.login())
+    .then(() => {
+      if (getState().change.get('currentChange') === change && getState().file.get('currentFile') === fileId) {
+        return Promise.resolve('already loaded')
+      } else {
+        dispatch(actions.currentFile( fileId ))
+        return dispatch(loadChange(change))
+        .then( (response) => {
+          dispatch(actions.setLoading(true))
+          return api.data.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
+        })
+        .then( (response) => {
+          dispatch(actions.setFileDetail( immutableFromJS(response) ))
+          dispatch(actions.setLoading(false))
+        })
+      }
     })
     .catch(loadErrorHandler(dispatch))
   }

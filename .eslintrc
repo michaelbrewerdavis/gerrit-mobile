@@ -11,7 +11,7 @@
   },
   "rules": {
     "react/jsx-uses-react": 1,
-    "no-unused-vars": 0,
+    "no-unused-vars": 1,
     "react/prop-types": 0,
     "react/jsx-curly-spacing": 0,
     "react/jsx-boolean-value": [2, "always"],

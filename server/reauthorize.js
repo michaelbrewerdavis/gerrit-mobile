@@ -6,7 +6,7 @@ const md5 = require('js-md5')
 
 module.exports = {
   interceptChallenge: (proxyRes, req, res) => {
-    if (proxyRes.statusCode === 401 && !req.headers['x-gerritmobileretry']) {
+    if (proxyRes.statusCode === 401 && !req.headers['x-gerrit-intercept-challenge']) {
       req.session.challenge = proxyRes.headers['www-authenticate']
       delete proxyRes.headers['www-authenticate']
 

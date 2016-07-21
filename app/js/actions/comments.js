@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions'
 import api, { loadErrorHandler } from './api'
 import { immutableFromJS } from '../helpers'
+import actions from './basic'
 
 export const setComments = createAction('setComments')
 export const setDraftComments = createAction('setDraftComments')
@@ -57,5 +58,19 @@ export function loadDraftComments(changeId) {
     .then( (response) => {
       dispatch(setDraftComments( immutableFromJS(response) ))
     })
+  }
+}
+
+export function postReview(changeId, revisionId, text) {
+  return (dispatch) => {
+    api.data.request('/changes/' + changeId + '/revisions/' + revisionId + '/review', {
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        message: text,
+        drafts: 'PUBLISH_ALL_REVISIONS',
+        omitDuplicateComments: true
+      })
+    }).then( (response) => dispatch(actions.clearData()) )
   }
 }
