@@ -9,6 +9,14 @@ body {
   font-family: sans-serif;
 }
 
+.lower {
+  margin-top: 5px;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: space-around;
+}
 .panel-white {
   background-color: #FFFFFF;
   border-color: #DDDDDD;
@@ -229,6 +237,7 @@ body {
 }
 
 .message-expanded {
+  white-space: pre-line;
 }
 
 .comment-filename {

@@ -1,4 +1,5 @@
 import React from 'react'
+import $ from 'jquery'
 import { connect } from 'react-redux'
 import { Map, List } from 'immutable'
 
@@ -21,10 +22,22 @@ class ActionBar extends React.Component {
   }
 
   postReview() {
+    const message = this.refs.replyText.value
+    this.refs.replyText.value = ''
+
+    const votes = {}
+    const form = $(this.refs.modalForm)
+    form.find('input').serializeArray().forEach((vote) => {
+      votes[vote.name] = vote.value
+    })
+    if (message === '' && $.isEmptyObject(votes)) {
+      return
+    }
     this.props.postReview(
       this.props.change.get('change_id'),
       this.props.change.get('current_revision'),
-      this.refs.replyText.value
+      message,
+      votes
     )
   }
 
@@ -44,6 +57,18 @@ class ActionBar extends React.Component {
       )
     })
   }
+
+  voteButtons(label, labelName) {
+    const buttons = label.get('values').map((value, key) => (
+      (
+      <label key={key} className='btn btn-primary btn-outline btn-sm'>
+        <input type='radio' name={labelName} value={key} />
+        {key}
+      </label>
+    )
+    ))
+    return buttons.toArray()
+  }
   render() {
     const labels = this.props.change.get('labels') || Map()
     return (
@@ -59,7 +84,7 @@ class ActionBar extends React.Component {
             <table className='table table-striped'>
               <tbody>
               {
-                labels.map((label, key) => this.statusRow(key, label)).valueSeq()
+                labels.map((label, key) => this.statusRow(key, label)).toArray()
               }
               </tbody>
             </table>
@@ -73,12 +98,36 @@ class ActionBar extends React.Component {
                 <h4 className="modal-title" id="submit-modal-label">Reply</h4>
               </div>
               <div className="modal-body">
-                <textarea ref='replyText' className='comment-edit-textarea' />
-                ...
+                <form ref='modalForm'>
+                  <div>
+                    <textarea ref='replyText' name='message' className='comment-edit-textarea' />
+                  </div>
+                  <div className="container lower">
+                    <div className='list-group'>
+                    {
+                      labels.map((label, labelName) => {
+                        if (!label.get('values')) { return null }
+                        return (
+                          <div key={labelName} className="list-group-item row">
+                            <div className='col-xs-4'>{labelName}</div>
+                            <div className='col-xs-8 flex-center'>
+                              <div className='btn-group' data-toggle='buttons'>
+                                {
+                                  this.voteButtons(label, labelName)
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })
+                    }
+                    </div>
+                  </div>
+                </form>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.postReview}>Post</button>
+                <button type="button" className="btn btn-primary" data-dismiss='modal' onClick={this.postReview}>Post</button>
               </div>
             </div>
           </div>
@@ -91,7 +140,7 @@ class ActionBar extends React.Component {
 class
 ReviewChange extends React.Component {
   render() {
-    const changeDetail = this.props.state.change.get('changeDetail') || Map()
+    const changeDetail = this.props.state.change
     const comments = this.props.state.change.get('comments') || Map()
     const currentRevision = changeDetail.getIn(['revisions', changeDetail.get('current_revision')]) || Map()
     const files = currentRevision.get('files') || Map()
@@ -133,15 +182,14 @@ ReviewChange extends React.Component {
 
   firstChildLocation() {
     const files = this.props.state.change.getIn([
-      'changeDetail',
       'revisions',
-      this.props.state.change.get('selectedRevision'),
+      this.props.state.change.get('current_revision'),
       'files'])
     if (files) {
       const filename = files.keySeq().first()
       return pathToFile(
         this.props.state.change.get('currentChange'),
-        this.props.state.change.get('selectedRevision'),
+        this.props.state.change.get('current_revision'),
         filename)
     }
     return '/'
@@ -149,8 +197,8 @@ ReviewChange extends React.Component {
 
   checkCurrentChange() {
     const changeId = this.props.params.changeId
-    if (!this.props.state.change.get('changeDetail') ||
-      changeId !== this.props.state.change.getIn(['changeDetail', 'id'])) {
+    if (!this.props.state.change ||
+      changeId !== this.props.state.change.get('id')) {
       this.props.loadChange(this.props.params.changeId)
     }
   }

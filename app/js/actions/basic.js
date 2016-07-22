@@ -8,7 +8,7 @@ export default {
   setUser: createAction('setUser'),
   setChanges: createAction('setChanges'),
   currentChange: createAction('currentChange'),
-  currentFile: createAction('currentFile'),
+  setCurrentFile: createAction('setCurrentFile'),
   setChangeDetail: createAction('setChangeDetail'),
-  setFileDetail: createAction('setFileDetail')
+  setFileDiff: createAction('setFileDiff')
 }

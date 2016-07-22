@@ -46,17 +46,16 @@ function loadChange(changeId) {
         dispatch(actions.currentChange( changeId ))
         dispatch(actions.setLoading(true))
         return Promise.all([
-          api.data.request('/changes/' + changeId + '/detail?o=CURRENT_REVISION&o=CURRENT_COMMIT&o=ALL_FILES'),
+          api.data.request('/changes/' + changeId + '/detail?o=DETAILED_LABELS&o=ALL_REVISIONS&o=CURRENT_COMMIT&o=MESSAGES&o=CURRENT_ACTIONS&o=CHANGE_ACTIONS&o=ALL_FILES'),
           api.data.request('/changes/' + changeId + '/comments'),
           dispatch(actions.loadDraftComments(changeId))
         ])
         .then( (responses) => {
           if (responses) {
-            const changeDetail = responses[0]
-            const comments = responses[1]
-
-            dispatch(actions.setChangeDetail( immutableFromJS(changeDetail) ))
-            dispatch(actions.setComments( immutableFromJS(comments) ))
+            const changeDetail = immutableFromJS(responses[0])
+            const comments = immutableFromJS(responses[1])
+            dispatch(actions.setChangeDetail(changeDetail))
+            dispatch(actions.setComments(comments))
           }
           dispatch(actions.setLoading(false))
         })
@@ -73,14 +72,14 @@ function loadFile(change, revision, fileId) {
       if (getState().change.get('currentChange') === change && getState().file.get('currentFile') === fileId) {
         return Promise.resolve('already loaded')
       } else {
-        dispatch(actions.currentFile( fileId ))
+        dispatch(actions.setCurrentFile( fileId ))
         return dispatch(loadChange(change))
         .then( (response) => {
           dispatch(actions.setLoading(true))
           return api.data.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
         })
         .then( (response) => {
-          dispatch(actions.setFileDetail( immutableFromJS(response) ))
+          dispatch(actions.setFileDiff( immutableFromJS(response) ))
           dispatch(actions.setLoading(false))
         })
       }

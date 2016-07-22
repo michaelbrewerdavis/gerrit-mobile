@@ -61,13 +61,14 @@ export function loadDraftComments(changeId) {
   }
 }
 
-export function postReview(changeId, revisionId, text) {
+export function postReview(changeId, revisionId, text, votes) {
   return (dispatch) => {
     api.data.request('/changes/' + changeId + '/revisions/' + revisionId + '/review', {
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
         message: text,
+        labels: votes,
         drafts: 'PUBLISH_ALL_REVISIONS',
         omitDuplicateComments: true
       })

@@ -14,10 +14,9 @@ class Message extends React.Component {
   constructor(props) {
     super(props)
     this.state = { expanded: undefined }
-    this.messageBody = this.props.message.get('message')
+    this.messageBody = this.props.message.get('message').replace('\n\n', '\n')
     this._toggleState = this.toggleState.bind(this)
-
-    let lines = this.messageBody.split('\n\n')
+    let lines = this.messageBody.split('\n')
     if (lines.length > 1) {
       this.firstLine = lines.slice(0, 2).join(' ')
       this.rest = lines.slice(2).join('\n')
@@ -47,24 +46,24 @@ class Message extends React.Component {
       return (
         <div key='expanded' className='message-expanded panel-body'>
           <Linkify>
-          <div className='message-expanded-body'>{this.firstLine}<br />{this.rest}</div>
-          {
-            this.props.comments.map((list, file) => (
-              <div key={file} className='comment-file'>
-                <Link to={pathToFile(this.props.changeId, this.props.revision, file)}>
-                  <div className='comment-filename'>{file}</div>
-                </Link>
-                {
-                  list.map((comment) => (
-                    <div key={comment.get('id')} className='comment-row'>
-                      <div className='comment-line'>{comment.get('line')}</div>
-                      <div className='comment-body'>{comment.get('message')}</div>
-                    </div>
-                  ))
-                }
-              </div>
-            )).valueSeq().toJS()
-          }
+            <div className='message-expanded-body'>{this.messageBody}</div>
+            {
+              this.props.comments.map((list, file) => (
+                <div key={file} className='comment-file'>
+                  <Link to={pathToFile(this.props.changeId, this.props.revision, file)}>
+                    <div className='comment-filename'>{file}</div>
+                  </Link>
+                  {
+                    list.map((comment) => (
+                      <div key={comment.get('id')} className='comment-row'>
+                        <div className='comment-line'>{comment.get('line')}</div>
+                        <div className='comment-body'>{comment.get('message')}</div>
+                      </div>
+                    ))
+                  }
+                </div>
+              )).valueSeq().toJS()
+            }
           </Linkify>
         </div>
       )
@@ -73,7 +72,7 @@ class Message extends React.Component {
 
   render() {
     const panelClass = classNames('panel', 'panel-default', {
-      'panel-super': this.hasComments()
+      'panel-super': isImportant(this.props.message)
     })
     const headingClass = classNames('panel-heading', {
       'panel-heading-small': !this.isExpanded()
@@ -153,7 +152,7 @@ export default class MessageList extends React.Component {
         <div className='detail-row change-label'>
           <h4>History</h4>
           <button onClick={this.toggleExpanded} className='btn btn-xs btn-default btn-outline'>
-            { this.isExpanded()  ? 'Show Less' : 'Show All'}
+            { this.isExpanded() ? 'Show Less' : 'Show All'}
           </button>
         </div>
         <div className='panel-group'>

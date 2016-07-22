@@ -6,6 +6,9 @@ import { Map } from 'immutable'
 import commentReducers from './reducers/comments'
 
 const setData = (state, action) => action.payload || Map()
+const mergeData = (state, action) => {
+  return state.merge(action.payload || Map())
+}
 const clearData = () => Map()
 const serialReducer = (fns) => {
   return (state, action) => {
@@ -38,32 +41,25 @@ const changes = handleActions({
 }, Map())
 
 const change = serialReducer([
-  handleActions({ clearData }),
+  handleActions({
+    clearData,
+    setChangeDetail: mergeData
+  }),
   combineReducersImmutable({
     comments: commentReducers,
 
     currentChange: handleActions({
       currentChange: (state, action) => action.payload
-    }, Map()),
-
-    changeDetail: handleActions({
-      setChangeDetail: (state, action) => action.payload
-    }, Map()),
-
-    selectedRevision: handleActions({
-      setChangeDetail: (state, action) => {
-        return action.payload.get('current_revision')
-      }
-    }, '')
+    }, Map())
   }, Map())
 ])
 
 const file = handleActions({
-  currentFile: (state, action) => {
+  setCurrentFile: (state, action) => {
     return state.set('currentFile', action.payload)
   },
-  setFileDetail: (state, action) => {
-    return state.set('fileDetail', action.payload)
+  setFileDiff: (state, action) => {
+    return state.set('diff', action.payload)
   },
   clearData
 }, Map())

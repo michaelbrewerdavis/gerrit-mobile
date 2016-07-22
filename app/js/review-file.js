@@ -9,7 +9,7 @@ require('../css/app.css')
 
 class ReviewFile extends React.Component {
   getPatchNumber(revision) {
-    return this.props.state.change.getIn(['changeDetail', 'revisions', revision, '_number'])
+    return this.props.state.change.getIn(['revisions', revision, '_number'])
   }
 
   getCommentsForPatchSet(patchNumber) {
@@ -40,7 +40,6 @@ class ReviewFile extends React.Component {
 
   nextLocation(offset) {
     const files = this.props.state.change.getIn([
-      'changeDetail',
       'revisions',
       this.props.params.revisionId,
       'files'])
@@ -65,7 +64,7 @@ class ReviewFile extends React.Component {
         <nav.Header {...this.props} content={
           <div className='file-header-info'>
             <div className='header-title file-header-change'>
-              { state.change.getIn(['changeDetail', 'subject']) }
+              { state.change.get('subject') }
             </div>
             <div className='header-title file-name'>
               { state.file.get('currentFile')}
@@ -76,7 +75,7 @@ class ReviewFile extends React.Component {
           <Diff {...props}
             filename={ state.file.get('currentFile') }
             patchNumber={ this.getPatchNumber(this.props.params.revisionId) }
-            diff={ state.file.get('fileDetail') }
+            diff={ state.file.get('diff') }
             comments={this.comments()}
             changeId={this.props.params.changeId}
             revisionId={this.props.params.revisionId} />
@@ -104,7 +103,7 @@ class ReviewFile extends React.Component {
     const revisionId = this.props.params.revisionId
     const fileName = this.props.params.fileName
     const loadedChangeId = this.props.state.change.get('currentChange')
-    const loadedRevisionId = this.props.state.change.getIn(['changeDetail', 'current_revision'])
+    const loadedRevisionId = this.props.state.change.get('current_revision')
     const loadedFileName = this.props.state.file.get('currentFile')
 
     if (changeId !== loadedChangeId || fileName !== loadedFileName || revisionId !== loadedRevisionId) {
