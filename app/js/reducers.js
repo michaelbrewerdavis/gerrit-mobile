@@ -49,7 +49,7 @@ const change = serialReducer([
     comments: commentReducers,
 
     currentChange: handleActions({
-      currentChange: (state, action) => action.payload
+      currentChange: (state, action) => action.payload || Map()
     }, Map())
   }, Map())
 ])

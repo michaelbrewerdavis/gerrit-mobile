@@ -94,7 +94,6 @@ class ActionBar extends React.Component {
           <div className="modal-dialog" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 className="modal-title" id="submit-modal-label">Reply</h4>
               </div>
               <div className="modal-body">
@@ -102,15 +101,15 @@ class ActionBar extends React.Component {
                   <div>
                     <textarea ref='replyText' name='message' className='comment-edit-textarea' />
                   </div>
-                  <div className="container lower">
+                  <div className="lower">
                     <div className='list-group'>
                     {
                       labels.map((label, labelName) => {
                         if (!label.get('values')) { return null }
                         return (
-                          <div key={labelName} className="list-group-item row">
-                            <div className='col-xs-4'>{labelName}</div>
-                            <div className='col-xs-8 flex-center'>
+                          <div key={labelName} className="list-group-item detail-row">
+                            <div className=''>{labelName}</div>
+                            <div className='flex-center review-buttons'>
                               <div className='btn-group' data-toggle='buttons'>
                                 {
                                   this.voteButtons(label, labelName)

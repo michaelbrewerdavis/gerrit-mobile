@@ -22,6 +22,11 @@ body {
   border-color: #DDDDDD;
 }
 
+.review-buttons {
+  width: 180px;
+  flex-shrink: 0;
+}
+
 .truncate-text {
   display: block;
   overflow: hidden;
