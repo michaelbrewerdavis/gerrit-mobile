@@ -1,6 +1,6 @@
 import React from 'react'
 import Immutable, { List } from 'immutable'
-import classNames from 'classNames'
+import classNames from 'classnames'
 import { Link } from 'react-router'
 
 require('../../css/app.css')

@@ -11,7 +11,6 @@ RUN npm install
 
 ADD webpack.config.js $APP_HOME
 ADD . $APP_HOME
-RUN npm run pack
-
+RUN npm run pack:prod
 
 USER docker
