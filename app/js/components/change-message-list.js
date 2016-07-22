@@ -1,6 +1,7 @@
 import React from 'react'
 import Immutable, { List } from 'immutable'
 import classNames from 'classnames'
+import Linkify from 'react-linkify'
 import { Link } from 'react-router'
 
 require('../../css/app.css')
@@ -45,6 +46,7 @@ class Message extends React.Component {
     if (this.isExpanded()) {
       return (
         <div key='expanded' className='message-expanded panel-body'>
+          <Linkify>
           <div className='message-expanded-body'>{this.firstLine}<br />{this.rest}</div>
           {
             this.props.comments.map((list, file) => (
@@ -63,6 +65,7 @@ class Message extends React.Component {
               </div>
             )).valueSeq().toJS()
           }
+          </Linkify>
         </div>
       )
     }
@@ -93,7 +96,7 @@ class Message extends React.Component {
   }
 }
 
-function commentsForMessage(allComments, message) {
+function addCommentsToMessage(allComments, message) {
   const messageTime = message.get('date')
   const filteredComments = {}
   allComments.get('committed').map((list, filename) => {
@@ -102,27 +105,72 @@ function commentsForMessage(allComments, message) {
       filteredComments[filename] = filteredList
     }
   })
-  return Immutable.fromJS(filteredComments)
+  return message.set('comments', Immutable.fromJS(filteredComments))
 }
 
-export default function MessageList(props, state) {
-  const messages = props.messages || List()
-  return (
-    <div className='container messages'>
-      <h4>History</h4>
-      <div className='panel-group'>
-      {
-        messages.map((message) => {
-          return (
-            <Message key={message.get('id')}
-              changeId={props.changeId}
-              revision={props.revision}
-              message={message}
-              comments={commentsForMessage(props.comments, message)} />
-          )
-        }).toArray()
-      }
+function isImportant(message) {
+  if (message.get('comments').size > 0) {
+    return true
+  }
+  if (message.get('message').match(/^Uploaded patch set/)) {
+    return false
+  }
+  const filteredUsers = ['hudson', 'jenkins', 'firework']
+  const user = message.getIn(['author', 'username'])
+  if (!filteredUsers.includes(user)) {
+    return true
+  }
+  if (message.get('message').match(/\b\S+[+-]\d+\b/)) {
+    // vote
+    return true
+  }
+  return false
+}
+
+export default class MessageList extends React.Component {
+  constructor() {
+    super()
+    this.state = { expanded: false }
+    this.toggleExpanded = this.toggleExpanded.bind(this)
+  }
+
+  toggleExpanded() {
+    this.setState({ expanded: !this.state.expanded })
+  }
+
+  isExpanded() {
+    return this.state.expanded
+  }
+
+  render() {
+    let messages = this.props.messages || List()
+    messages = messages.map((m) => addCommentsToMessage(this.props.comments, m))
+    if (!this.isExpanded()) {
+      messages = messages.filter((m) => isImportant(m))
+    }
+    return (
+      <div className='container messages'>
+        <div className='detail-row change-label'>
+          <h4>History</h4>
+          <button onClick={this.toggleExpanded} className='btn btn-xs btn-default btn-outline'>
+            { this.isExpanded()  ? 'Show Less' : 'Show All'}
+          </button>
+        </div>
+        <div className='panel-group'>
+        {
+          messages.map((message) => {
+            return (
+              <Message key={message.get('id')}
+                changeId={this.props.changeId}
+                revision={this.props.revision}
+                message={message}
+                comments={message.get('comments')}
+                />
+            )
+          }).toArray()
+        }
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 }

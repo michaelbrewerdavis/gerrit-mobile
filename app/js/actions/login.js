@@ -24,7 +24,7 @@ function authenticate() {
     })
     .then( (response) => {
       const user = response
-      dispatch(actions.setUserData( immutableFromJS(user) ))
+      dispatch(actions.setUser( immutableFromJS(user) ))
     })
   }
 }
@@ -53,7 +53,7 @@ function storeDigestPassword(digestPassword) {
   return (dispatch, getState) => {
     let user = getState().user
     user = user.set('digest_password', digestPassword)
-    dispatch(actions.setUserData( user ))
+    dispatch(actions.setUser( user ))
 
     return api.auth.request('/store', {
       method: 'POST',

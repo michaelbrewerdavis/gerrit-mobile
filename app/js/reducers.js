@@ -5,6 +5,7 @@ import { combineReducers as combineReducersImmutable } from 'redux-immutable'
 import { Map } from 'immutable'
 import commentReducers from './reducers/comments'
 
+const setData = (state, action) => action.payload || Map()
 const clearData = () => Map()
 const serialReducer = (fns) => {
   return (state, action) => {
@@ -27,16 +28,12 @@ const app = handleActions({
 }, Map())
 
 const user = handleActions({
-  setUserData: (state, action) => {
-    return action.payload
-  },
+  setUser: setData,
   clearData
 }, Map())
 
-const dashboard = handleActions({
-  setChanges: (state, action) => {
-    return state.set('changes', action.payload)
-  },
+const changes = handleActions({
+  setChanges: setData,
   clearData
 }, Map())
 
@@ -74,7 +71,7 @@ const file = handleActions({
 export const reducers = combineReducers({
   app,
   user,
-  dashboard,
+  changes,
   change,
   file,
   routing

@@ -67,17 +67,18 @@ function DashboardHeader(props, state) {
 
 class Dashboard extends React.Component {
   render() {
+    const changes = this.props.state.changes
     return (
       <div id='dashboard'>
         <DashboardHeader { ...this.props } />
         <div className='dashboard-content container'>
           <Changes
             label='My changes'
-            changes={this.props.state.dashboard.getIn(['changes', 'outgoing'])}
+            changes={changes.get('outgoing')}
             includeUsername={false} />
           <Changes
             label='Incoming changes'
-            changes={this.props.state.dashboard.getIn(['changes', 'incoming'])}
+            changes={changes.get('incoming')}
             includeUsername={true} />
         </div>
       </div>
@@ -85,7 +86,8 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    if (!this.props.state.app.get('dashboardError') && !this.props.state.dashboard.get('changes')) {
+    if (!this.props.state.app.get('dashboardError') &&
+        this.props.state.changes.isEmpty()) {
       this.props.loadDashboard()
     }
   }

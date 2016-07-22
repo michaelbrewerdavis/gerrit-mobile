@@ -5,7 +5,7 @@ export default {
   setLoading: createAction('setLoading'),
   setDashboardError: createAction('setDashboardError'),
   setError: createAction('setError'),
-  setUserData: createAction('setUserData'),
+  setUser: createAction('setUser'),
   setChanges: createAction('setChanges'),
   currentChange: createAction('currentChange'),
   currentFile: createAction('currentFile'),
