@@ -2,7 +2,7 @@ import { immutableFromJS } from '../helpers'
 import actions from './basic'
 import api from './api'
 
-function authenticate() {
+export function login() {
   return (dispatch, getState) => {
     if (!getState().user.isEmpty()) {
       return Promise.resolve()
@@ -25,26 +25,6 @@ function authenticate() {
       const user = response
       dispatch(actions.setUser( immutableFromJS(user) ))
     })
-  }
-}
-
-const inProgress = {
-  login: null
-}
-export function login() {
-  return (dispatch) => {
-    if (inProgress.login) {
-      return inProgress.login
-    } else {
-      dispatch(actions.setLoading(true))
-      const newLogin = dispatch(authenticate())
-        .then(() => {
-          dispatch(actions.setLoading(false))
-          inProgress.login = null
-        })
-      inProgress.login = newLogin
-      return newLogin
-    }
   }
 }
 

@@ -2,8 +2,24 @@ import $ from 'jquery'
 import cookie from 'cookie'
 import actions from './basic'
 
+const requestsInProgress = {}
+
 const api = {
   request: (path, options = {}) => {
+    const key = JSON.stringify({ path, options })
+    if (requestsInProgress[key]) {
+      return requestsInProgress[key]
+    }
+    const request = api._request(path, options)
+      .then((resp) => {
+        delete requestsInProgress[key]
+        return resp
+      })
+    requestsInProgress[key] = request
+    return request
+  },
+
+  _request: (path, options = {}) => {
     return new Promise((resolve, reject) => {
       $.ajax($.extend(true, {
         url: '/api' + path,
