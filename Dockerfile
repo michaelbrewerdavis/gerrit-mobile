@@ -9,6 +9,7 @@ WORKDIR $APP_HOME
 ADD package.json $APP_HOME
 RUN npm install
 
+ENV NODE_ENV production
 ADD webpack.config.js $APP_HOME
 ADD . $APP_HOME
 RUN npm run pack:prod
