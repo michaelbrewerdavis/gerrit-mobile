@@ -9,7 +9,7 @@
     "dev2": "webpack-dev-server -d --progress --colors --content-base public/",
     "lint": "eslint --ext .js app app.js server",
     "pack": "webpack -d --progress --colors",
-    "pack:prod": "webpack -p --progress --colors",
+    "pack:prod": "webpack -p --progress --colors --define process.env.NODE_ENV='\"production\"'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "mbd@instructure.com",

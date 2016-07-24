@@ -19,8 +19,10 @@ function rewriteLocation(proxyRes, req, res) {
       location = domain + location
     } else {
       const parsed = url.parse(location)
-      parsed.protocol = req.protocol
       parsed.pathname = domain + parsed.pathname
+      if (process.env.NODE_ENV == 'development') {
+        parsed.protocol = req.protocol
+      }
       location = url.format(parsed)
     }
     proxyRes.headers['location'] = location

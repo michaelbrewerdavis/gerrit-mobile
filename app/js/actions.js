@@ -67,14 +67,18 @@ function loadChange(changeId) {
 
 function loadFile(change, revision, fileId) {
   return (dispatch, getState) => {
-    return dispatch(loadChange(change))
+    return dispatch(actions.login())
     .then(() => {
-      if (getState().file.get('currentFile') === fileId) {
-        return Promise.resolve()
+      if (getState().change.get('currentChange') === change && getState().file.get('currentFile') === fileId) {
+        return Promise.resolve('already loaded')
       } else {
-        return api.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
+        dispatch(actions.setCurrentFile( fileId ))
+        return dispatch(loadChange(change))
         .then( (response) => {
-          dispatch(actions.setCurrentFile( fileId ))
+          dispatch(actions.setLoading(true))
+          return api.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
+        })
+        .then( (response) => {
           dispatch(actions.setFileDiff( immutableFromJS(response) ))
           dispatch(actions.setLoading(false))
         })
