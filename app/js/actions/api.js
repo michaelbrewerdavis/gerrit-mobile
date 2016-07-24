@@ -1,45 +1,26 @@
 import $ from 'jquery'
+import cookie from 'cookie'
 import actions from './basic'
 
-export default {
-  auth: api('/auth'),
-  data: api('/api/a')
-}
-
-function api(prefix = '') {
-  return {
-    request: (path, options = {}) => {
-      return new Promise((resolve, reject) => {
-        $.ajax($.extend({
-          url: prefix + path,
-          dataType: 'json',
-          dataFilter: (data) => {
-            return data.substr(data.indexOf('\n') + 1)
-          }
-        }, options))
-        .done((response) => {
-          resolve(response)
-        })
-        .fail((error) => {
-          if (error.status === 444) {
-            const headers = options.headers ? options.headers : {}
-            headers['x-gerrit-intercept-challenge'] = 1
-            options.headers = headers
-            return api(prefix).request(path, options)
-            .then((response) => {
-              resolve(response)
-            })
-            .catch((error) => {
-              reject(error)
-            })
-          } else {
-            reject(error)
-          }
-        })
+const api = {
+  request: (path, options = {}) => {
+    return new Promise((resolve, reject) => {
+      $.ajax($.extend(true, {
+        url: '/api' + path,
+        dataFilter: (data) => {
+          return data.substr(data.indexOf('\n') + 1)
+        }
+      }, getXSRFHeader(), options))
+      .done((response, status, xhr) => {
+        resolve(response)
       })
-    }
+      .fail((error, status, xhr) => {
+        reject(error)
+      })
+    })
   }
 }
+export default api
 
 export function loadErrorHandler(dispatch) {
   return (error) => {
@@ -48,5 +29,14 @@ export function loadErrorHandler(dispatch) {
     dispatch(actions.currentChange(null))
     dispatch(actions.setCurrentFile(null))
     dispatch(actions.setLoading(false))
+  }
+}
+
+function getXSRFHeader() {
+  const cookies = cookie.parse(window.document.cookie)
+  if (cookies.XSRF_TOKEN) {
+    return { headers: {'X-Gerrit-Auth': cookies.XSRF_TOKEN} }
+  } else {
+    return {}
   }
 }

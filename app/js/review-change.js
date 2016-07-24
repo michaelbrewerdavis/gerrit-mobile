@@ -30,9 +30,6 @@ class ActionBar extends React.Component {
     form.find('input').serializeArray().forEach((vote) => {
       votes[vote.name] = vote.value
     })
-    if (message === '' && $.isEmptyObject(votes)) {
-      return
-    }
     this.props.postReview(
       this.props.change.get('change_id'),
       this.props.change.get('current_revision'),

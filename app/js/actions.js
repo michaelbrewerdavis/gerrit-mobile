@@ -19,7 +19,7 @@ function loadDashboard() {
     return dispatch(actions.login())
     .then( () => {
       dispatch(actions.setLoading(true))
-      return api.data.request('/changes/?q=is:open+owner:self&q=is:open+reviewer:self+-owner:self&o=LABELS&o=DETAILED_ACCOUNTS')
+      return api.request('/changes/?q=is:open+owner:self&q=is:open+reviewer:self+-owner:self&o=LABELS&o=DETAILED_ACCOUNTS')
     })
     .then( (response) => {
       dispatch(actions.setChanges(immutableFromJS({
@@ -46,8 +46,8 @@ function loadChange(changeId) {
         dispatch(actions.currentChange( changeId ))
         dispatch(actions.setLoading(true))
         return Promise.all([
-          api.data.request('/changes/' + changeId + '/detail?o=DETAILED_LABELS&o=ALL_REVISIONS&o=CURRENT_COMMIT&o=MESSAGES&o=CURRENT_ACTIONS&o=CHANGE_ACTIONS&o=ALL_FILES'),
-          api.data.request('/changes/' + changeId + '/comments'),
+          api.request('/changes/' + changeId + '/detail?o=DETAILED_LABELS&o=ALL_REVISIONS&o=CURRENT_COMMIT&o=MESSAGES&o=CURRENT_ACTIONS&o=CHANGE_ACTIONS&o=ALL_FILES'),
+          api.request('/changes/' + changeId + '/comments'),
           dispatch(actions.loadDraftComments(changeId))
         ])
         .then( (responses) => {
@@ -76,7 +76,7 @@ function loadFile(change, revision, fileId) {
         return dispatch(loadChange(change))
         .then( (response) => {
           dispatch(actions.setLoading(true))
-          return api.data.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
+          return api.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
         })
         .then( (response) => {
           dispatch(actions.setFileDiff( immutableFromJS(response) ))

@@ -1,7 +1,6 @@
 import { immutableFromJS } from '../helpers'
 import actions from './basic'
 import api from './api'
-import { hashHistory } from 'react-router'
 
 function authenticate() {
   return (dispatch, getState) => {
@@ -9,7 +8,7 @@ function authenticate() {
       return Promise.resolve()
     }
 
-    return api.auth.request('/login')
+    return api.request('/login')
     .catch( (error) => {
       // ignore non-auth login error - may be CORS error on redirect
       if (error.status !== 401 && error.status !== 403) {
@@ -20,47 +19,11 @@ function authenticate() {
       }
     })
     .then( () => {
-      return api.auth.request('/accounts/self/')
+      return api.request('/accounts/self/')
     })
     .then( (response) => {
       const user = response
       dispatch(actions.setUser( immutableFromJS(user) ))
-    })
-  }
-}
-
-function getDigestPassword() {
-  return (dispatch, getState) => {
-    if (getState().user.get('digest_password')) {
-      return Promise.resolve()
-    }
-
-    return api.auth.request('/accounts/self/password.http')
-    .catch((error) => {
-      if (error.status === 404) {
-        // dispatch(push('/createPassword'))
-        hashHistory.push('/createPassword')
-      }
-      throw error
-    })
-    .then( (response) => {
-      return dispatch(storeDigestPassword(response))
-    })
-  }
-}
-
-function storeDigestPassword(digestPassword) {
-  return (dispatch, getState) => {
-    let user = getState().user
-    user = user.set('digest_password', digestPassword)
-    dispatch(actions.setUser( user ))
-
-    return api.auth.request('/store', {
-      method: 'POST',
-      data: {
-        username: user.get('username'),
-        password: digestPassword
-      }
     })
   }
 }
@@ -75,7 +38,6 @@ export function login() {
     } else {
       dispatch(actions.setLoading(true))
       const newLogin = dispatch(authenticate())
-        .then(() => dispatch(getDigestPassword()))
         .then(() => {
           dispatch(actions.setLoading(false))
           inProgress.login = null
@@ -90,13 +52,13 @@ export function logout() {
   return (dispatch) => {
     dispatch(actions.setLoading(true))
     dispatch(actions.clearData())
-    return api.auth.request('/logout')
+    return api.request('/logout')
     // eslint-disable-next-line handle-callback-err
     .catch((error) => {
       // expect redirect error here
     })
     .then(() => {
-      return api.auth.request('/', {
+      return api.request('/', {
         username: 'xxx',
         password: 'xxx',
         headers: { 'Authorization': 'Basic xxx' }

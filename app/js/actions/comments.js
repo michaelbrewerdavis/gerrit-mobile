@@ -19,7 +19,7 @@ export function deleteComment(changeId, revisionId, comment) {
     if (comment.get('is_new')) {
       return
     }
-    return api.data.request('/changes/' + changeId + '/revisions/' + revisionId + '/drafts/' + comment.get('id'), {
+    return api.request('/changes/' + changeId + '/revisions/' + revisionId + '/drafts/' + comment.get('id'), {
       method: 'DELETE'
     })
     .then(() => dispatch(loadDraftComments(changeId)))
@@ -37,7 +37,7 @@ export function saveComment(changeId, revisionId, comment) {
     } else {
       url = '/changes/' + changeId + '/revisions/' + revisionId + '/drafts/' + comment.get('id')
     }
-    return api.data.request(url, {
+    return api.request(url, {
       method: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -54,7 +54,7 @@ export function saveComment(changeId, revisionId, comment) {
 
 export function loadDraftComments(changeId) {
   return (dispatch, getState) => {
-    api.data.request('/changes/' + changeId + '/drafts')
+    api.request('/changes/' + changeId + '/drafts')
     .then( (response) => {
       dispatch(setDraftComments( immutableFromJS(response) ))
     })
@@ -63,7 +63,7 @@ export function loadDraftComments(changeId) {
 
 export function postReview(changeId, revisionId, text, votes) {
   return (dispatch) => {
-    api.data.request('/changes/' + changeId + '/revisions/' + revisionId + '/review', {
+    api.request('/changes/' + changeId + '/revisions/' + revisionId + '/review', {
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({
