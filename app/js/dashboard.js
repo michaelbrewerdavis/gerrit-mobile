@@ -17,6 +17,7 @@ function Change(props, state) {
           <div className='dashboard-change-text-details'>
             <div className='detail-row'>
               <div className='dashboard-change-detail'>{props.change.get('_number')}</div>
+              &nbsp;-&nbsp;
               <div className='dashboard-change-detail'>{props.change.get('project')}</div>
             </div>
             <div className='detail-row'>
