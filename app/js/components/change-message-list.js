@@ -3,12 +3,9 @@ import Immutable, { List } from 'immutable'
 import classNames from 'classnames'
 import Linkify from 'react-linkify'
 import { Link } from 'react-router'
+import { makePath } from '../helpers'
 
 require('../../css/app.css')
-
-function pathToFile(changeId, revisionId, filename) {
-  return '/changes/' + changeId + '/revisions/' + revisionId + '/files/' + encodeURIComponent(filename)
-}
 
 class Message extends React.Component {
   constructor(props) {
@@ -50,7 +47,7 @@ class Message extends React.Component {
             {
               this.props.comments.map((list, file) => (
                 <div key={file} className='comment-file'>
-                  <Link to={pathToFile(this.props.changeId, this.props.revision, file)}>
+                  <Link to={makePath({...this.props, fileId: file})}>
                     <div className='comment-filename'>{file}</div>
                   </Link>
                   {
@@ -159,9 +156,7 @@ export default class MessageList extends React.Component {
         {
           messages.map((message) => {
             return (
-              <Message key={message.get('id')}
-                changeId={this.props.changeId}
-                revision={this.props.revision}
+              <Message {...this.props} key={message.get('id')}
                 message={message}
                 comments={message.get('comments')}
                 />

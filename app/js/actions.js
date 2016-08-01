@@ -1,4 +1,4 @@
-import { immutableFromJS } from './helpers'
+import { immutableFromJS, getPatchSetNumber, getRevisionId } from './helpers'
 import * as commentActions from './actions/comments'
 import basicActions from './actions/basic'
 import api, { loadErrorHandler } from './actions/api'
@@ -14,11 +14,24 @@ const actions = {
 }
 export default actions
 
+function getLoadKey(...args) {
+  return args.join(':')
+}
+
 function loadDashboard() {
   return (dispatch, getState) => {
+    const loadKey = getLoadKey('dashboard')
+
+    if (getState().app.get('error') !== '' ||
+        getState().app.get('loadsInProgress').includes(loadKey) ||
+        !getState().changes.isEmpty())
+    {
+      return
+    }
+
+    dispatch(actions.startLoading(loadKey))
     return dispatch(actions.login())
     .then( () => {
-      dispatch(actions.setLoading(true))
       return api.request('/changes/?q=is:open+owner:self&q=is:open+reviewer:self+-owner:self&o=LABELS&o=DETAILED_ACCOUNTS')
     })
     .then( (response) => {
@@ -26,63 +39,109 @@ function loadDashboard() {
         outgoing: response[0],
         incoming: response[1]
       })))
-      dispatch(actions.setError(null))
-      dispatch(actions.setLoading(false))
+      dispatch(actions.stopLoading(loadKey))
     })
     .catch( (error) => {
-      dispatch(actions.setDashboardError(true))
       loadErrorHandler(dispatch)(error)
     })
   }
 }
 
-function loadChange(changeId) {
+function loadChange(changeId, revisionId, baseRevisionId) {
   return (dispatch, getState) => {
-    return dispatch(actions.login())
-    .then( () => {
-      if (getState().change.get('currentChange') === changeId) {
-        return Promise.resolve()
-      } else {
-        dispatch(actions.currentChange( changeId ))
-        dispatch(actions.setLoading(true))
-        return Promise.all([
-          api.request('/changes/' + changeId + '/detail?o=DETAILED_LABELS&o=ALL_REVISIONS&o=CURRENT_COMMIT&o=MESSAGES&o=CURRENT_ACTIONS&o=CHANGE_ACTIONS&o=ALL_FILES'),
-          api.request('/changes/' + changeId + '/comments'),
-          dispatch(actions.loadDraftComments(changeId))
-        ])
-        .then( (responses) => {
-          if (responses) {
-            const changeDetail = immutableFromJS(responses[0])
-            const comments = immutableFromJS(responses[1])
-            dispatch(actions.setChangeDetail(changeDetail))
-            dispatch(actions.setComments(comments))
-          }
-          dispatch(actions.setLoading(false))
-        })
-      }
+    const loadKey = getLoadKey('change', changeId, revisionId, baseRevisionId)
+
+    if (getState().app.get('error') !== '' ||
+        getState().app.get('loadsInProgress').includes(loadKey) ||
+        (getState().current.get('changeId') === changeId &&
+          getState().current.get('revisionId') === revisionId &&
+          getState().current.get('baseRevisionId') === baseRevisionId))
+    {
+      return
+    }
+
+    dispatch(actions.startLoading(loadKey))
+    dispatch(actions.login())
+    .then(() => {
+      return dispatch(loadChangeDetail(changeId))
+    })
+    .then(() => {
+      return Promise.all([
+        dispatch(actions.loadComments(changeId)),
+        dispatch(actions.loadDraftComments(changeId)),
+        dispatch(loadFiles(changeId, revisionId, baseRevisionId))
+      ])
+    })
+    .then( (responses) => {
+      dispatch(actions.setCurrentChangeId( changeId ))
+      dispatch(actions.setCurrentRevisionId( revisionId ))
+      dispatch(actions.setCurrentBaseRevisionId( baseRevisionId ))
+      dispatch(actions.stopLoading(loadKey))
     })
     .catch(loadErrorHandler(dispatch))
   }
 }
 
-function loadFile(change, revision, fileId) {
+function loadChangeDetail(changeId) {
   return (dispatch, getState) => {
-    return dispatch(actions.login())
+    return api.request('/changes/' + changeId + '/detail?o=DETAILED_LABELS&o=ALL_REVISIONS&o=CURRENT_COMMIT&o=MESSAGES&o=CURRENT_ACTIONS&o=CHANGE_ACTIONS')
+    .then((response) => {
+      return dispatch(actions.setChange(immutableFromJS(response)))
+    })
+  }
+}
+
+function loadFiles(changeId, revisionId, baseRevisionId) {
+  return (dispatch, getState) => {
+    if (revisionId === 'latest') {
+      revisionId = getState().change.get('current_revision')
+    }
+    if (baseRevisionId === 'base') {
+      baseRevisionId = '0'
+    }
+    const query = (baseRevisionId === '0') ? '' : ('?base=' + getPatchSetNumber(getState(), baseRevisionId))
+    const uri = '/changes/' + changeId + '/revisions/' + getRevisionId(getState(), revisionId) + '/files' + query
+    return api.request(uri)
+    .then((response) => {
+      const files = immutableFromJS(response).map((value, key) => value.set('name', key)).toList().sortBy((v) => v.get('name'))
+      dispatch(actions.setFiles(files))
+    })
+  }
+}
+
+function loadFile(changeId, revisionId, baseRevisionId, fileId) {
+  return (dispatch, getState) => {
+    const loadKey = getLoadKey('file', changeId, revisionId, baseRevisionId, fileId)
+
+    if (getState().app.get('error') !== '' ||
+        getState().app.get('loadsInProgress').includes(loadKey) ||
+        (getState().current.get('changeId') === changeId &&
+          getState().current.get('revisionId') === revisionId &&
+          getState().current.get('baseRevisionId') === baseRevisionId &&
+          getState().current.get('fileId') === fileId))
+    {
+      return
+    }
+
+    dispatch(actions.startLoading(loadKey))
+    dispatch(actions.login())
     .then(() => {
-      if (getState().change.get('currentChange') === change && getState().file.get('currentFile') === fileId) {
-        return Promise.resolve('already loaded')
-      } else {
-        dispatch(actions.setCurrentFile( fileId ))
-        return dispatch(loadChange(change))
-        .then( (response) => {
-          dispatch(actions.setLoading(true))
-          return api.request('/changes/' + change + '/revisions/' + revision + '/files/' + encodeURIComponent(fileId) + '/diff')
-        })
-        .then( (response) => {
-          dispatch(actions.setFileDiff( immutableFromJS(response) ))
-          dispatch(actions.setLoading(false))
-        })
+      return dispatch(loadChange(changeId, revisionId, baseRevisionId))
+    })
+    .then(() => {
+      return dispatch(loadChangeDetail(changeId))
+    })
+    .then((response) => {
+      if (baseRevisionId === 'base') {
+        baseRevisionId = '0'
       }
+      const query = (baseRevisionId === '0') ? '' : ('?base=' + getPatchSetNumber(getState(), baseRevisionId))
+      return api.request('/changes/' + changeId + '/revisions/' + getRevisionId(getState(), revisionId) + '/files/' + encodeURIComponent(fileId) + '/diff' + query)
+    })
+    .then( (response) => {
+      dispatch(actions.setFile( immutableFromJS(response) ))
+      dispatch(actions.setCurrentFileId( fileId ))
+      dispatch(actions.stopLoading(loadKey))
     })
     .catch(loadErrorHandler(dispatch))
   }

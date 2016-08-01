@@ -10,6 +10,8 @@ module.exports = {
     filename: "bundle.js"
   },
 
+  devtool: 'inline-source-map', //just do inline source maps instead of the default
+
   module: {
     preLoaders: [{
       test: /\.jsx?$/,

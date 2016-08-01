@@ -42,9 +42,8 @@ export function loadErrorHandler(dispatch) {
   return (error) => {
     console.log('error', error) // eslint-disable-line no-console
     dispatch(actions.setError(error.message || error.statusText))
-    dispatch(actions.currentChange(null))
-    dispatch(actions.setCurrentFile(null))
-    dispatch(actions.setLoading(false))
+    dispatch(actions.clearData())
+    dispatch(actions.clearLoading())
   }
 }
 

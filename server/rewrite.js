@@ -20,8 +20,8 @@ function rewriteLocation(proxyRes, req, res) {
     } else {
       const parsed = url.parse(location)
       parsed.pathname = domain + parsed.pathname
-      if (process.env.NODE_ENV == 'development') {
-        parsed.protocol = req.protocol
+      if (process.env.NODE_ENV !== 'production') {
+        parsed.protocol = req.protocol + ':'
       }
       location = url.format(parsed)
     }

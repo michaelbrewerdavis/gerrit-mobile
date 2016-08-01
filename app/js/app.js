@@ -6,7 +6,7 @@ import thunk from 'redux-thunk'
 import { Router, Route, IndexRoute, hashHistory } from 'react-router'
 import { syncHistoryWithStore } from 'react-router-redux'
 
-import Chrome from './chrome'
+import Chrome from './components/chrome'
 import Dashboard from './dashboard'
 import ReviewChange from './review-change'
 import ReviewFile from './review-file'
@@ -32,8 +32,9 @@ ReactDOM.render(
         <IndexRoute component={Dashboard} />
         <Route path='changes/:changeId'>
           <IndexRoute component={ReviewChange} />
-          <Route path='revisions/:revisionId'>
-            <Route path='files/:fileName' component={ReviewFile} />
+          <Route path=':revisionId'>
+            <IndexRoute component={ReviewChange} />
+            <Route path=':fileName' component={ReviewFile} />
           </Route>
         </Route>
       </Route>

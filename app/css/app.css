@@ -13,6 +13,10 @@ body {
   margin-top: 5px;
 }
 
+.flex-grow {
+  flex-grow: 1
+}
+
 .flex-center {
   display: flex;
   justify-content: space-around;
@@ -44,7 +48,18 @@ body {
   opacity: 0.7;
   display: flex;
   align-items: center;
+}
 
+.modal.error-modal {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #FFFFFF;
+  opacity: 0.7;
+}
+
+.error-modal .alert {
+  flex: 0 1 auto;
 }
 
 .list-
@@ -67,10 +82,6 @@ body {
 
 .flex-spacer {
   flex: 1 1 auto;
-}
-
-.footer {
-  box-shadow: 0px 0px 2px #888888;
 }
 
 #dashboard {
@@ -135,6 +146,8 @@ body {
 .detail-row {
   display: flex;
   justify-content: space-between;
+  align-content: center;
+  align-items: center;
 }
 
 .dashboard-change-details {
@@ -149,6 +162,30 @@ body {
 
 .change-label {
   margin: 2px;
+}
+
+.revision-button .btn {
+  width: 60px;
+}
+
+.revision-menu {
+  padding: 0;
+  min-width: 100px;
+  text-align: center;
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.footer-side {
+  width: 32%;
+}
+
+.footer-center {
+  width: 36%;
+}
+
+.footer {
+  text-align: center;
 }
 
 .dashboard-change-mainline {
@@ -276,10 +313,6 @@ body {
   flex: 1 1 auto;
 }
 
-.create-password {
-  margin-top: 12px;
-}
-
 .file {
   display: flex;
   flex-direction: column;
@@ -350,6 +383,7 @@ body {
 .comment {
   background-color: #FFA;
   margin: 6px 0px;
+  padding: 0px 10px;
 }
 
 .comment-header {

@@ -132,7 +132,7 @@ export function getCommentsForLine(props, type) {
   comments = comments.getIn([lineNumber, type])
   if (!comments || !comments.size) { return null }
 
-  comments = comments.sort().valueSeq()
+  comments = comments.sortBy(c => c.get('updated')).toArray()
   return (
     <div className='comments'>
     {

@@ -5,12 +5,14 @@ import { Link } from 'react-router'
 import actions from './actions'
 import * as nav from './nav'
 import StatusLabels from './components/status-labels'
+import { makePath } from './helpers'
 
 require('../css/app.css')
 
 function Change(props, state) {
+  const target = makePath({ changeId: props.change.get('id') })
   return (
-    <Link to={'/changes/' + props.change.get('id')} className='list-group-item'>
+    <Link to={target} className='list-group-item'>
       <div className='dashboard-change'>
         <div className='dashboard-change-subject'>{props.change.get('subject')}</div>
         <div className='dashboard-change-details'>
@@ -87,10 +89,7 @@ class Dashboard extends React.Component {
   }
 
   componentDidMount() {
-    if (!this.props.state.app.get('dashboardError') &&
-        this.props.state.changes.isEmpty()) {
-      this.props.loadDashboard()
-    }
+    this.props.loadDashboard()
   }
 }
 

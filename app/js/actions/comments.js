@@ -52,18 +52,27 @@ export function saveComment(changeId, revisionId, comment) {
   }
 }
 
+export function loadComments(changeId) {
+  return (dispatch, getState) => {
+    return api.request('/changes/' + changeId + '/comments')
+    .then( (response) => {
+      return dispatch(setComments( immutableFromJS(response) ))
+    })
+  }
+}
+
 export function loadDraftComments(changeId) {
   return (dispatch, getState) => {
-    api.request('/changes/' + changeId + '/drafts')
+    return api.request('/changes/' + changeId + '/drafts')
     .then( (response) => {
-      dispatch(setDraftComments( immutableFromJS(response) ))
+      return dispatch(setDraftComments( immutableFromJS(response) ))
     })
   }
 }
 
 export function postReview(changeId, revisionId, text, votes) {
   return (dispatch) => {
-    api.request('/changes/' + changeId + '/revisions/' + revisionId + '/review', {
+    return api.request('/changes/' + changeId + '/revisions/' + revisionId + '/review', {
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({

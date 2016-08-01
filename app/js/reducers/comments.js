@@ -2,13 +2,17 @@ import {handleActions} from 'redux-actions'
 import {combineReducers} from 'redux-immutable'
 import Immutable, { Map } from 'immutable'
 
+const clearData = () => Map()
+
 export default combineReducers({
   committed: handleActions({
-    setComments: (state, action) => action.payload
+    setComments: (state, action) => action.payload,
+    clearData
   }, Map()),
 
   draft: handleActions({
     setDraftComments: (state, action) => action.payload,
+    clearData,
 
     updateDraftComment: replaceDraftComment((c, target) => target),
 

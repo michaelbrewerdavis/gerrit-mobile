@@ -20,6 +20,7 @@
     "no-var": [2],
     "space-before-function-paren": [1, "never"],
     "space-in-parens": 0,
+    "brace-style": 0,
 
     "no-warning-comments": 1,
 

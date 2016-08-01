@@ -2,13 +2,17 @@ import { createAction } from 'redux-actions'
 
 export default {
   clearData: createAction('clearData'),
-  setLoading: createAction('setLoading'),
-  setDashboardError: createAction('setDashboardError'),
+  startLoading: createAction('startLoading'),
+  stopLoading: createAction('stopLoading'),
+  clearLoading: createAction('clearLoading'),
   setError: createAction('setError'),
   setUser: createAction('setUser'),
+  setCurrentChangeId: createAction('setCurrentChangeId'),
+  setCurrentRevisionId: createAction('setCurrentRevisionId'),
+  setCurrentBaseRevisionId: createAction('setCurrentBaseRevisionId'),
+  setCurrentFileId: createAction('setCurrentFileId'),
   setChanges: createAction('setChanges'),
-  currentChange: createAction('currentChange'),
-  setCurrentFile: createAction('setCurrentFile'),
-  setChangeDetail: createAction('setChangeDetail'),
-  setFileDiff: createAction('setFileDiff')
+  setChange: createAction('setChange'),
+  setFile: createAction('setFile'),
+  setFiles: createAction('setFiles')
 }

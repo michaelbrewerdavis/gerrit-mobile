@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
+import { getPatchSetNumber } from './helpers'
 
 export function Glyph(props) {
   const className = 'glyphicon glyphicon-' + props.name
@@ -67,15 +68,79 @@ export class Header extends React.Component {
   }
 }
 
-export function Footer(props, state) {
+export function Footer(props) {
+  const baseRevision = props.state.current.get('baseRevisionId')
+  const currentRevision = props.state.current.get('revisionId')
   return (
     <nav className='navbar navbar-default navbar-fixed-bottom'>
       <div className='container'>
-        { props.leftNav }
-        <div className='pull-right'>
-          { props.rightNav }
+        <div className='detail-row footer'>
+          <div className='detail-row footer-side'>
+            <NavButton location={props.up || ''}>
+              <Glyph name='chevron-up' />
+            </NavButton>
+          </div>
+          <div className='detail-row footer-center'>
+            <RevisionButton {...props}
+              showZero={true}
+              revisionId={props.state.current.get('baseRevisionId')}
+              action={(i) => props.action(i, currentRevision)} />
+            <span className='text-primary'>
+              &nbsp;<Glyph name='arrow-right' />&nbsp;
+            </span>
+            <RevisionButton {...props}
+              revisionId={props.state.current.get('revisionId')}
+              action={(i) => props.action(baseRevision, i)} />
+          </div>
+          <div className='detail-row footer-side'>
+            <div className='flex-spacer' />
+            {
+              props.left ? (
+                <NavButton location={props.left || ''}>
+                  <Glyph name='chevron-left' />
+                </NavButton>
+              ) : ''
+            }
+            <NavButton location={props.right || ''}>
+              <Glyph name='chevron-right' />
+            </NavButton>
+          </div>
         </div>
       </div>
     </nav>
+  )
+}
+
+function RevisionButton(props) {
+  let revisionCount = 0
+  if (props.state.change && props.state.change.get('revisions')) {
+    revisionCount = props.state.change.get('revisions').size
+  }
+  const psNumber = getPatchSetNumber(props.state, props.revisionId)
+  return (
+    <div className='dropdown revision-button'>
+      <button type='button' data-toggle='dropdown'
+        className='btn btn-primary btn-outline btn-small dropdown-toggle'>
+        {psNumber}
+      </button>
+      <ul className='dropdown-menu list-group revision-menu'>
+      {
+        (function() {
+          const foo = Array.from({length: revisionCount + 1}, (x, i) => {
+            if (i === 0 && !props.showZero) { return }
+            return (
+              <li key={i}
+                className='list-group-item'>
+                <Link className='' to={props.action(i)}>
+                  {i}
+                </Link>
+              </li>
+            )
+          })
+          return foo
+        }())
+      }
+      </ul>
+    </div>
   )
 }

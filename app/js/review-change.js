@@ -8,12 +8,9 @@ import * as nav from './nav'
 import FileList from './components/change-file-list'
 import MessageList from './components/change-message-list'
 import StatusLabels from './components/status-labels'
+import { makePath } from './helpers'
 
 require('../css/app.css')
-
-function pathToFile(changeId, revisionId, filename) {
-  return '/changes/' + changeId + '/revisions/' + revisionId + '/files/' + encodeURIComponent(filename)
-}
 
 class ActionBar extends React.Component {
   constructor() {
@@ -52,7 +49,7 @@ class ActionBar extends React.Component {
           <td>{resp.get('username')}</td>
         </tr>
       )
-    })
+    }).toArray()
   }
 
   voteButtons(label, labelName) {
@@ -115,7 +112,7 @@ class ActionBar extends React.Component {
                             </div>
                           </div>
                         )
-                      })
+                      }).toArray()
                     }
                     </div>
                   </div>
@@ -133,15 +130,17 @@ class ActionBar extends React.Component {
   }
 }
 
-class
-ReviewChange extends React.Component {
+class ReviewChange extends React.Component {
   render() {
     const changeDetail = this.props.state.change
-    const comments = this.props.state.change.get('comments') || Map()
+    const comments = this.props.state.comments || Map()
     const currentRevision = changeDetail.getIn(['revisions', changeDetail.get('current_revision')]) || Map()
-    const files = currentRevision.get('files') || Map()
+
+    const files = this.props.state.files || Map()
     const changeId = changeDetail.get('id')
-    const revisionId = changeDetail.get('current_revision')
+    const revisionId = this.props.state.current.get('revisionId')
+    const baseRevisionId = this.props.state.current.get('baseRevisionId')
+    const changeRevision = this.changeRevision.bind(this)
 
     return (
       <div className='change'>
@@ -155,19 +154,13 @@ ReviewChange extends React.Component {
             { currentRevision.getIn([ 'commit', 'message' ])}
           </div>
           <ActionBar {...this.props} change={changeDetail} />
-          <FileList files={files} selectFile={this.props.selectFile} changeId={changeId} revision={revisionId} />
-          <MessageList changeId={changeId} revision={revisionId} messages={changeDetail.get('messages')} comments={comments} />
+          <FileList {...this.props} files={files} changeId={changeId} revisionId={revisionId} baseRevisionId={baseRevisionId} />
+          <MessageList {...this.props} changeId={changeId} revisionId={revisionId} baseRevisionId={baseRevisionId}
+             messages={changeDetail.get('messages')} comments={comments} />
         </div>
-        <nav.Footer {...this.props} leftNav={
-          <nav.NavButton location={this.parentLocation()}>
-            <nav.Glyph name='chevron-up' />
-          </nav.NavButton>
-        } rightNav={
-          <nav.NavButton location={this.firstChildLocation()}>
-            <nav.Glyph name='chevron-right' />
-            <nav.Glyph name='chevron-right' />
-          </nav.NavButton>
-        } />
+        <nav.Footer {...this.props} up={this.parentLocation()}
+          right={this.firstChildLocation()}
+          action={changeRevision} />
       </div>
     )
   }
@@ -177,26 +170,38 @@ ReviewChange extends React.Component {
   }
 
   firstChildLocation() {
-    const files = this.props.state.change.getIn([
-      'revisions',
-      this.props.state.change.get('current_revision'),
-      'files'])
-    if (files) {
-      const filename = files.keySeq().first()
-      return pathToFile(
-        this.props.state.change.get('currentChange'),
-        this.props.state.change.get('current_revision'),
-        filename)
+    const files = this.props.state.files
+    if (!files.isEmpty()) {
+      const filename = files.first().get('name')
+      return makePath({
+        state: this.props.state,
+        changeId: this.props.state.current.get('changeId'),
+        revisionId: this.props.state.current.get('revisionId'),
+        baseRevisionId: this.props.state.current.get('baseRevisionId'),
+        fileId: filename
+      })
     }
     return '/'
   }
 
+  changeRevision(base, current) {
+    if (!this.props) {
+      return {}
+    }
+    return makePath({
+      state: this.props.state,
+      changeId: this.props.state.current.get('changeId'),
+      revisionId: current,
+      baseRevisionId: base
+    })
+  }
+
   checkCurrentChange() {
     const changeId = this.props.params.changeId
-    if (!this.props.state.change ||
-      changeId !== this.props.state.change.get('id')) {
-      this.props.loadChange(this.props.params.changeId)
-    }
+    const revisionId = this.props.params.revisionId || 'latest'
+    const baseRevisionId = this.props.location.query.base || 'base'
+
+    this.props.loadChange(changeId, revisionId, baseRevisionId)
   }
 
   componentDidMount() {

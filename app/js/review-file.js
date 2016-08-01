@@ -4,21 +4,18 @@ import { connect } from 'react-redux'
 import actions from './actions'
 import * as nav from './nav'
 import Diff from './components/file-diff'
+import { makePath, getPatchSetNumber } from './helpers'
 
 require('../css/app.css')
 
 class ReviewFile extends React.Component {
-  getPatchNumber(revision) {
-    return this.props.state.change.getIn(['revisions', revision, '_number'])
-  }
-
   getCommentsForPatchSet(patchNumber) {
     let lineNumbersToComments = Map()
     const types = ['committed', 'draft']
 
     types.forEach((type) => {
-      const allComments = this.props.state.change.getIn(['comments', type, this.props.params.fileName]) || List()
-      const commentsForRevision = allComments.filter((comment) => ( comment.get('patch_set') === (patchNumber) ))
+      const allComments = this.props.state.comments.getIn([type, this.props.params.fileName]) || List()
+      const commentsForRevision = allComments.filter((comment) => ( comment.get('patch_set') == (patchNumber) )) // eslint-disable-line eqeqeq
       commentsForRevision.forEach((comment) => {
         const line = comment.get('line')
         const id = comment.get('id')
@@ -30,28 +27,29 @@ class ReviewFile extends React.Component {
 
   comments() {
     return Map({
-      b: this.getCommentsForPatchSet( this.getPatchNumber(this.props.params.revisionId) )
+      b: this.getCommentsForPatchSet( getPatchSetNumber(this.props.state, this.props.state.current.get('revisionId')) )
     })
   }
 
   parentLocation() {
-    return '/changes/' + this.props.state.change.get('currentChange')
+    return makePath({ ...this.props.params, state: this.props.state, baseRevisionId: this.props.state.current.get('baseRevisionId') })
   }
 
   nextLocation(offset) {
-    const files = this.props.state.change.getIn([
-      'revisions',
-      this.props.params.revisionId,
-      'files'])
-    if (files) {
-      const currentFile = this.props.state.file.get('currentFile')
-      const filenames = files.keySeq()
+    const files = this.props.state.files
+    if (!files.isEmpty()) {
+      const currentFile = this.props.state.current.get('fileId')
+      const filenames = files.map((v) => v.get('name')).toArray()
       const index = filenames.indexOf(currentFile)
       const newIndex = index + offset
-      if (newIndex >= 0 && newIndex < filenames.size) {
-        return '/changes/' + this.props.state.change.get('currentChange') +
-          '/revisions/' + this.props.params.revisionId +
-          '/files/' + encodeURIComponent(filenames.get(newIndex))
+      if (newIndex >= 0 && newIndex < filenames.length) {
+        return makePath({
+          state: this.props.state,
+          changeId: this.props.state.current.get('changeId'),
+          revisionId: this.props.state.current.get('revisionId'),
+          baseRevisionId: this.props.state.current.get('baseRevisionId'),
+          fileId: filenames[newIndex]
+        })
       }
     }
     return this.parentLocation()
@@ -59,6 +57,7 @@ class ReviewFile extends React.Component {
 
   render() {
     const { state, ...props } = this.props
+    const changeRevision = this.changeRevision.bind(this)
     return (
       <div className='file has-footer'>
         <nav.Header {...this.props} content={
@@ -67,48 +66,48 @@ class ReviewFile extends React.Component {
               { state.change.get('subject') }
             </div>
             <div className='header-title file-name'>
-              { state.file.get('currentFile')}
+              { state.current.get('fileId')}
             </div>
           </div>
         } />
         <div className='header-body'>
           <Diff {...props}
-            filename={ state.file.get('currentFile') }
-            patchNumber={ this.getPatchNumber(this.props.params.revisionId) }
-            diff={ state.file.get('diff') }
+            filename={ state.current.get('fileId') }
+            patchNumber={ getPatchSetNumber(state, this.props.params.revisionId) }
+            diff={ state.file }
             comments={this.comments()}
             changeId={this.props.params.changeId}
             revisionId={this.props.params.revisionId} />
         </div>
-        <nav.Footer {...this.props} leftNav={
-          <nav.NavButton location={this.parentLocation()}>
-            <nav.Glyph name='chevron-up' />
-          </nav.NavButton>
-        } rightNav={[
-          <nav.NavButton location={this.nextLocation(-1)} key='left'>
-            <nav.Glyph name='chevron-left' />
-            <nav.Glyph name='chevron-left' />
-          </nav.NavButton>,
-          <nav.NavButton location={this.nextLocation(1)} key='right'>
-            <nav.Glyph name='chevron-right' />
-            <nav.Glyph name='chevron-right' />
-          </nav.NavButton>
-        ]} />
+        <nav.Footer {...this.props}
+          up={this.parentLocation()}
+          left={this.nextLocation(-1)}
+          right={this.nextLocation(1)}
+          action={changeRevision} />
       </div>
     )
   }
 
+  changeRevision(base, current) {
+    if (!this.props) {
+      return {}
+    }
+    return makePath({
+      state: this.props.state,
+      changeId: this.props.state.current.get('changeId'),
+      revisionId: current,
+      baseRevisionId: base,
+      fileId: this.props.state.current.get('fileId')
+    })
+  }
+
   checkCurrentFile() {
     const changeId = this.props.params.changeId
-    const revisionId = this.props.params.revisionId
+    const revisionId = this.props.params.revisionId || 'latest'
+    const baseRevisionId = this.props.location.query.base || 'base'
     const fileName = this.props.params.fileName
-    const loadedChangeId = this.props.state.change.get('currentChange')
-    const loadedRevisionId = this.props.state.change.get('current_revision')
-    const loadedFileName = this.props.state.file.get('currentFile')
 
-    if (changeId !== loadedChangeId || fileName !== loadedFileName || revisionId !== loadedRevisionId) {
-      this.props.loadFile(changeId, revisionId, fileName)
-    }
+    this.props.loadFile(changeId, revisionId, baseRevisionId, fileName)
   }
 
   componentDidMount() {

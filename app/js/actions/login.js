@@ -14,7 +14,7 @@ export function login() {
       if (error.status !== 401 && error.status !== 403) {
         // do nothing
       } else {
-        dispatch(actions.setDashboardError(true))
+        dispatch(actions.setError(error))
         throw error
       }
     })
@@ -30,7 +30,7 @@ export function login() {
 
 export function logout() {
   return (dispatch) => {
-    dispatch(actions.setLoading(true))
+    dispatch(actions.startLoading('logout'))
     dispatch(actions.clearData())
     return api.request('/logout')
     // eslint-disable-next-line handle-callback-err
