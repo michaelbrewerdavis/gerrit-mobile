@@ -85,8 +85,8 @@ export function Footer(props) {
               showZero={true}
               revisionId={props.state.current.get('baseRevisionId')}
               action={(i) => props.action(i, currentRevision)} />
-            <span className='text-primary'>
-              &nbsp;<Glyph name='arrow-right' />&nbsp;
+            <span className='text-primary revision-arrow'>
+              <Glyph name='arrow-right' />
             </span>
             <RevisionButton {...props}
               revisionId={props.state.current.get('revisionId')}

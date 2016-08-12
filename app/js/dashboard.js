@@ -10,7 +10,7 @@ import { makePath } from './helpers'
 require('../css/app.css')
 
 function Change(props, state) {
-  const target = makePath({ changeId: props.change.get('id') })
+  const target = makePath({ changeId: props.change.get('_number') })
   return (
     <Link to={target} className='list-group-item'>
       <div className='dashboard-change'>

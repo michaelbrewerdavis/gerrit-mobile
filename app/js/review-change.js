@@ -137,7 +137,7 @@ class ReviewChange extends React.Component {
     const currentRevision = changeDetail.getIn(['revisions', changeDetail.get('current_revision')]) || Map()
 
     const files = this.props.state.files || Map()
-    const changeId = changeDetail.get('id')
+    const changeId = this.props.state.current.get('changeId')
     const revisionId = this.props.state.current.get('revisionId')
     const baseRevisionId = this.props.state.current.get('baseRevisionId')
     const changeRevision = this.changeRevision.bind(this)

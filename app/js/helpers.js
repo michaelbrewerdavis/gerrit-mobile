@@ -44,6 +44,9 @@ export function getPatchSetNumber(state, revisionId) {
 }
 
 export function getRevisionId(state, revisionKey) {
+  if (true) {
+    return getPatchSetNumber(state, revisionKey)
+  }
   if (revisionKey === 'base') {
     return null
   }

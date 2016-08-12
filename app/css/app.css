@@ -164,6 +164,11 @@ body {
   margin: 2px;
 }
 
+.revision-arrow {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
 .revision-button .btn {
   width: 60px;
 }
@@ -177,11 +182,11 @@ body {
 }
 
 .footer-side {
-  width: 32%;
+  flex: 0 1 auto;
 }
 
 .footer-center {
-  width: 36%;
+  flex: 0 1 auto;
 }
 
 .footer {
@@ -372,11 +377,11 @@ body {
 .file-diff-block {
 }
 
-.file-diff-block-a {
+.file-diff-block-a, .file-diff-block-a .line-content {
   background-color: #FAA;
 }
 
-.file-diff-block-b {
+.file-diff-block-b, .file-diff-block-b .line-content {
   background-color: #AFA;
 }
 
