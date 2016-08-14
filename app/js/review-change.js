@@ -156,7 +156,7 @@ class ReviewChange extends React.Component {
           <ActionBar {...this.props} change={changeDetail} />
           <FileList {...this.props} files={files} changeId={changeId} revisionId={revisionId} baseRevisionId={baseRevisionId} />
           <MessageList {...this.props} changeId={changeId} revisionId={revisionId} baseRevisionId={baseRevisionId}
-             messages={changeDetail.get('messages')} comments={comments} />
+            messages={changeDetail.get('messages')} comments={comments} />
         </div>
         <nav.Footer {...this.props} up={this.parentLocation()}
           right={this.firstChildLocation()}

@@ -50,10 +50,10 @@ describe('makePath', function() {
   }
 
   it('includes all four sections', function() {
-    expect(callMakePath('a', 'b', 'c', 'd')).toEqual('/changes/a/b/c?base=d')
+    expect(callMakePath('a', 'b', 'c', 'd')).toEqual('/c/a/b/c?base=d')
   })
   it('skips base when 0', function() {
-    expect(callMakePath('a', 'b', 'c', 0)).toEqual('/changes/a/b/c')
-    expect(callMakePath('a', 'b', 'c', 'base')).toEqual('/changes/a/b/c')
+    expect(callMakePath('a', 'b', 'c', 0)).toEqual('/c/a/b/c')
+    expect(callMakePath('a', 'b', 'c', 'base')).toEqual('/c/a/b/c')
   })
 })

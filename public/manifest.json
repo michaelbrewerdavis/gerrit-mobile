@@ -1,0 +1,26 @@
+{
+  "name": "Gerrit Mobile",
+  "icons": [
+    {
+      "src": "icons/gerrit_52.png",
+      "sizes": "52x52"
+    },
+    {
+      "src": "icons/gerrit_128.png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "icons/gerrit_192.png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/gerrit.svg",
+      "sizes": "52x52"
+    }
+  ],
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff",
+  "theme_color": "#337ab7"
+}

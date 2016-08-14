@@ -30,11 +30,11 @@ ReactDOM.render(
     <Router history={history}>
       <Route path='/' component={Chrome}>
         <IndexRoute component={Dashboard} />
-        <Route path='changes/:changeId'>
+        <Route path='c/:changeId'>
           <IndexRoute component={ReviewChange} />
           <Route path=':revisionId'>
             <IndexRoute component={ReviewChange} />
-            <Route path=':fileName' component={ReviewFile} />
+            <Route path='*' component={ReviewFile} />
           </Route>
         </Route>
       </Route>

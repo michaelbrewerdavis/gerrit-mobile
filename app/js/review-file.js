@@ -14,7 +14,8 @@ class ReviewFile extends React.Component {
     const types = ['committed', 'draft']
 
     types.forEach((type) => {
-      const allComments = this.props.state.comments.getIn([type, this.props.params.fileName]) || List()
+      const fileId = this.props.state.current.get('fileId')
+      const allComments = this.props.state.comments.getIn([type, fileId]) || List()
       const commentsForRevision = allComments.filter((comment) => ( comment.get('patch_set') == (patchNumber) )) // eslint-disable-line eqeqeq
       commentsForRevision.forEach((comment) => {
         const line = comment.get('line')
@@ -32,7 +33,8 @@ class ReviewFile extends React.Component {
   }
 
   parentLocation() {
-    return makePath({ ...this.props.params, state: this.props.state, baseRevisionId: this.props.state.current.get('baseRevisionId') })
+    return makePath({
+      ...this.props.state.current.toJS(), state: this.props.state })
   }
 
   nextLocation(offset) {
@@ -44,10 +46,8 @@ class ReviewFile extends React.Component {
       const newIndex = index + offset
       if (newIndex >= 0 && newIndex < filenames.length) {
         return makePath({
+          ...this.props.state.current.toJS(),
           state: this.props.state,
-          changeId: this.props.state.current.get('changeId'),
-          revisionId: this.props.state.current.get('revisionId'),
-          baseRevisionId: this.props.state.current.get('baseRevisionId'),
           fileId: filenames[newIndex]
         })
       }
@@ -105,7 +105,7 @@ class ReviewFile extends React.Component {
     const changeId = this.props.params.changeId
     const revisionId = this.props.params.revisionId || 'latest'
     const baseRevisionId = this.props.location.query.base || 'base'
-    const fileName = this.props.params.fileName
+    const fileName = this.props.params.splat
 
     this.props.loadFile(changeId, revisionId, baseRevisionId, fileName)
   }

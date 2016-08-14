@@ -12,13 +12,13 @@ export function makePath(params) {
   if (!params.changeId) {
     return ''
   }
-  let url = '/changes/' + params.changeId
+  let url = '/c/' + params.changeId
 
   if (!params.revisionId) { return url }
 
   url = url + '/' + getRevisionId(params.state, params.revisionId)
   if (params.fileId) {
-    url = url + '/' + encodeURIComponent(params.fileId)
+    url = url + '/' + params.fileId
   }
   if (params.baseRevisionId) {
     let basePS = getPatchSetNumber(params.state, params.baseRevisionId)
