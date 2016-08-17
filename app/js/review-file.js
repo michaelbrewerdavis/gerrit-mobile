@@ -34,7 +34,7 @@ class ReviewFile extends React.Component {
 
   parentLocation() {
     return makePath({
-      ...this.props.state.current.toJS(), state: this.props.state })
+      ...this.props.state.current.toJS(), state: this.props.state, fileId: null })
   }
 
   nextLocation(offset) {
