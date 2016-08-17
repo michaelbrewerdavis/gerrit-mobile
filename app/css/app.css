@@ -173,12 +173,28 @@ body {
   width: 60px;
 }
 
-.revision-menu {
+.revision-menu, .file-menu {
   padding: 0;
-  min-width: 100px;
-  text-align: center;
   max-height: 300px;
   overflow-y: scroll;
+  min-width: 100px;
+}
+
+.revision-menu {
+  text-align: center;
+}
+
+.file-menu {
+  text-align: left;
+}
+
+.file-menu .current {
+  pointer-events: none;
+}
+
+.file-menu > .current > a {
+  font-weight: 700 !important;
+  font-style: italic;
 }
 
 .footer-side {

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
-import { getPatchSetNumber } from './helpers'
+import { getPatchSetNumber, makePath } from './helpers'
+import classNames from 'classnames'
 
 export function Glyph(props) {
   const className = 'glyphicon glyphicon-' + props.name
@@ -80,6 +81,9 @@ export function Footer(props) {
               <Glyph name='chevron-up' />
             </NavButton>
           </div>
+          <div className='detail-row footer-side'>
+            <FileButton {...props} />
+          </div>
           <div className='detail-row footer-center'>
             <RevisionButton {...props}
               showZero={true}
@@ -111,6 +115,34 @@ export function Footer(props) {
   )
 }
 
+function FileButton(props) {
+  return (
+    <div className='dropdown file-button'>
+      <button type='button' data-toggle='dropdown' className='btn btn-primary btn-outline btn-small dropdown-toggle'>
+        <Glyph name='th-list' />
+      </button>
+      <ul className='dropdown-menu list-group file-menu'>
+      {
+        props.state.files.map((file) => {
+          const name = file.get('name')
+          const link = makePath({...props.state.current.toJS(), state: props.state, fileId: name})
+          const rowClass = classNames('list-group-item', {
+            'current': name == props.state.current.get('fileId')
+          })
+          return (
+            <li key={name} className={rowClass}>
+              <Link to={link}>
+                {name}
+              </Link>
+            </li>
+          )
+        }).valueSeq()
+      }
+      </ul>
+    </div>
+  )
+}
+
 function RevisionButton(props) {
   let revisionCount = 0
   if (props.state.change && props.state.change.get('revisions')) {
@@ -131,7 +163,7 @@ function RevisionButton(props) {
             return (
               <li key={i}
                 className='list-group-item'>
-                <Link className='' to={props.action(i)}>
+                <Link to={props.action(i)}>
                   {i}
                 </Link>
               </li>
