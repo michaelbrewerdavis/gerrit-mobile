@@ -67,3 +67,14 @@ export function getRevisionId(state, revisionKey) {
   }
   return revisionKey
 }
+
+export function splitFileId(fileId) {
+  const lastSlash = fileId.lastIndexOf('/')
+  if (lastSlash === -1) {
+    return { filename: fileId }
+  }
+
+  const path = fileId.substring(0, lastSlash)
+  const filename = fileId.substring(lastSlash + 1)
+  return { path, filename }
+}

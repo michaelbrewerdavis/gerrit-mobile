@@ -1,7 +1,6 @@
 import { createAction } from 'redux-actions'
 import api, { loadErrorHandler } from './api'
 import { immutableFromJS } from '../helpers'
-import actions from './basic'
 
 export const setComments = createAction('setComments')
 export const setDraftComments = createAction('setDraftComments')

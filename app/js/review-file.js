@@ -28,6 +28,7 @@ class ReviewFile extends React.Component {
 
   comments() {
     return Map({
+      a: this.getCommentsForPatchSet( getPatchSetNumber(this.props.state, this.props.state.current.get('baseRevisionId')) ),
       b: this.getCommentsForPatchSet( getPatchSetNumber(this.props.state, this.props.state.current.get('revisionId')) )
     })
   }
@@ -57,7 +58,6 @@ class ReviewFile extends React.Component {
 
   render() {
     const { state, ...props } = this.props
-    const changeRevision = this.changeRevision.bind(this)
     return (
       <div className='file has-footer'>
         <nav.Header {...this.props} content={
@@ -82,23 +82,9 @@ class ReviewFile extends React.Component {
         <nav.Footer {...this.props}
           up={this.parentLocation()}
           left={this.nextLocation(-1)}
-          right={this.nextLocation(1)}
-          action={changeRevision} />
+          right={this.nextLocation(1)} />
       </div>
     )
-  }
-
-  changeRevision(base, current) {
-    if (!this.props) {
-      return {}
-    }
-    return makePath({
-      state: this.props.state,
-      changeId: this.props.state.current.get('changeId'),
-      revisionId: current,
-      baseRevisionId: base,
-      fileId: this.props.state.current.get('fileId')
-    })
   }
 
   checkCurrentFile() {

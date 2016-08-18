@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
-import { makePath } from '../helpers'
+import { makePath, splitFileId } from '../helpers'
 
 require('../../css/app.css')
 
@@ -12,9 +12,11 @@ function FileListItem(props, state) {
   } else if (status === 'D') {
     className = className + ' list-group-item-override list-group-item-danger'
   }
+  const { path, filename } = splitFileId(props.fileId)
   return (
-    <Link className={className} to={makePath(props)}>
-      <div className='truncate-text'>{props.fileId}</div>
+    <Link to={makePath(props)} className={className}>
+      <div className='file-list-path truncate-text'>{path}</div>
+      <div className='file-list-filename truncate-text'>{filename}</div>
     </Link>
   )
 }

@@ -466,3 +466,7 @@ body {
     -webkit-transform: scale(1.0);
   }
 }
+
+.file-list-path {
+  font-size: 60%;
+}

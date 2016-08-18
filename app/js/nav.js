@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
-import { getPatchSetNumber, makePath } from './helpers'
+import { getPatchSetNumber, makePath, splitFileId } from './helpers'
 import classNames from 'classnames'
 
 export function Glyph(props) {
@@ -70,8 +70,6 @@ export class Header extends React.Component {
 }
 
 export function Footer(props) {
-  const baseRevision = props.state.current.get('baseRevisionId')
-  const currentRevision = props.state.current.get('revisionId')
   return (
     <nav className='navbar navbar-default navbar-fixed-bottom'>
       <div className='container'>
@@ -85,14 +83,14 @@ export function Footer(props) {
           <div className='detail-row footer-side'>
             <RevisionButton {...props}
               showZero={true}
-              revisionId={props.state.current.get('baseRevisionId')}
-              action={(i) => props.action(i, currentRevision)} />
+              propToSet='baseRevisionId'
+              revisionId={props.state.current.get('baseRevisionId')} />
             <span className='text-primary revision-arrow'>
               <Glyph name='arrow-right' />
             </span>
             <RevisionButton {...props}
-              revisionId={props.state.current.get('revisionId')}
-              action={(i) => props.action(baseRevision, i)} />
+              propToSet='revisionId'
+              revisionId={props.state.current.get('revisionId')} />
           </div>
           <div className='flex-spacer' />
           <div className='detail-row footer-side'>
@@ -117,18 +115,6 @@ export function Footer(props) {
   )
 }
 
-function truncatePath(str) {
-  const maxLength = 35
-  const lastSlash = str.lastIndexOf('/')
-  if (str.length < maxLength || lastSlash === -1) { return str }
-
-  const path = str.substring(0, lastSlash)
-  const filename = str.substring(lastSlash + 1)
-
-  const maxPathLength = Math.max(0, maxLength - filename.length)
-  return path.substring(0, maxPathLength) + '.../' + filename
-}
-
 function FileButton(props) {
   return (
     <div className='dropdown file-button'>
@@ -138,15 +124,17 @@ function FileButton(props) {
       <ul className='dropdown-menu list-group file-menu pull-right'>
       {
         props.state.files.map((file) => {
-          const name = file.get('name')
-          const link = makePath({...props.state.current.toJS(), state: props.state, fileId: name})
+          const fileId = file.get('name')
+          const { filename, path } = splitFileId(fileId)
+          const link = makePath({...props.state.current.toJS(), state: props.state, fileId})
           const rowClass = classNames('list-group-item', {
-            'current': name === props.state.current.get('fileId')
+            'current': fileId === props.state.current.get('fileId')
           })
           return (
-            <li key={name} className={rowClass}>
+            <li key={fileId} className={rowClass}>
               <Link to={link}>
-                {truncatePath(name)}
+                <div className='truncate-text file-list-path'>{path}</div>
+                <div className='truncate-text'>{filename}</div>
               </Link>
             </li>
           )
@@ -174,10 +162,12 @@ function RevisionButton(props) {
         (function() {
           const foo = Array.from({length: revisionCount + 1}, (x, i) => {
             if (i === 0 && !props.showZero) { return }
+            const pathParams = { ...props, ...props.state.current.toJS() }
+            pathParams[props.propToSet] = i
             return (
               <li key={i}
                 className='list-group-item'>
-                <Link to={props.action(i)}>
+                <Link to={makePath(pathParams)}>
                   {i}
                 </Link>
               </li>

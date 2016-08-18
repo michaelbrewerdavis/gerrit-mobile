@@ -2,7 +2,6 @@ import React from 'react'
 import $ from 'jquery'
 import { connect } from 'react-redux'
 import { Map, List } from 'immutable'
-import { Link } from 'react-router'
 
 import actions from './actions'
 import * as nav from './nav'
@@ -63,11 +62,6 @@ class ActionBar extends React.Component {
     )
     ))
     return buttons.toArray()
-  }
-
-  dismissModal() {
-    debugger
-    $('#submit-modal').css('display', 'none')
   }
 
   draftComments() {
@@ -169,7 +163,6 @@ class ReviewChange extends React.Component {
     const changeId = this.props.state.current.get('changeId')
     const revisionId = this.props.state.current.get('revisionId')
     const baseRevisionId = this.props.state.current.get('baseRevisionId')
-    const changeRevision = this.changeRevision.bind(this)
 
     return (
       <div className='change'>
@@ -188,8 +181,7 @@ class ReviewChange extends React.Component {
             messages={changeDetail.get('messages')} comments={comments} />
         </div>
         <nav.Footer {...this.props} up={this.parentLocation()}
-          right={this.firstChildLocation()}
-          action={changeRevision} />
+          right={this.firstChildLocation()} />
       </div>
     )
   }
