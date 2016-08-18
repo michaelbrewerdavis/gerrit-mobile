@@ -2,6 +2,7 @@ import React from 'react'
 import $ from 'jquery'
 import { connect } from 'react-redux'
 import { Map, List } from 'immutable'
+import { Link } from 'react-router'
 
 import actions from './actions'
 import * as nav from './nav'
@@ -63,6 +64,29 @@ class ActionBar extends React.Component {
     ))
     return buttons.toArray()
   }
+
+  dismissModal() {
+    debugger
+    $('#submit-modal').css('display', 'none')
+  }
+
+  draftComments() {
+    const drafts = this.props.state.comments.get('draft')
+    return drafts.map((comments, filename) => (
+      <div className='review-draft-comment' key={filename}>
+        <div className='comment-file'>{filename}</div>
+        {
+          comments.map((comment, i) => (
+            <div className='comment-row' key={i}>
+              <div className='comment-line'>{comment.get('line')}. </div>
+              <div className='comment-body'>{comment.get('message')}</div>
+            </div>
+          )).valueSeq()
+        }
+      </div>
+    )).valueSeq()
+  }
+
   render() {
     const labels = this.props.change.get('labels') || Map()
     return (
@@ -115,6 +139,11 @@ class ActionBar extends React.Component {
                       }).toArray()
                     }
                     </div>
+                  </div>
+                  <div className="lower reply-comments">
+                  {
+                    this.draftComments()
+                  }
                   </div>
                 </form>
               </div>

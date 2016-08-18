@@ -81,6 +81,6 @@ export function postReview(changeId, revisionId, text, votes) {
         drafts: 'PUBLISH_ALL_REVISIONS',
         omitDuplicateComments: true
       })
-    }).then( (response) => dispatch(actions.clearData()) )
+    }).then( (response) => window.location.reload() )
   }
 }

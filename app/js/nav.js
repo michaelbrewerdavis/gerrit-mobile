@@ -81,10 +81,8 @@ export function Footer(props) {
               <Glyph name='chevron-up' />
             </NavButton>
           </div>
+          &nbsp;
           <div className='detail-row footer-side'>
-            <FileButton {...props} />
-          </div>
-          <div className='detail-row footer-center'>
             <RevisionButton {...props}
               showZero={true}
               revisionId={props.state.current.get('baseRevisionId')}
@@ -96,8 +94,12 @@ export function Footer(props) {
               revisionId={props.state.current.get('revisionId')}
               action={(i) => props.action(baseRevision, i)} />
           </div>
+          <div className='flex-spacer' />
           <div className='detail-row footer-side'>
-            <div className='flex-spacer' />
+            <FileButton {...props} />
+          </div>
+          &nbsp;
+          <div className='detail-row footer-side'>
             {
               props.left ? (
                 <NavButton location={props.left || ''}>
@@ -115,24 +117,36 @@ export function Footer(props) {
   )
 }
 
+function truncatePath(str) {
+  const maxLength = 35
+  const lastSlash = str.lastIndexOf('/')
+  if (str.length < maxLength || lastSlash === -1) { return str }
+
+  const path = str.substring(0, lastSlash)
+  const filename = str.substring(lastSlash + 1)
+
+  const maxPathLength = Math.max(0, maxLength - filename.length)
+  return path.substring(0, maxPathLength) + '.../' + filename
+}
+
 function FileButton(props) {
   return (
     <div className='dropdown file-button'>
       <button type='button' data-toggle='dropdown' className='btn btn-primary btn-outline btn-small dropdown-toggle'>
         <Glyph name='th-list' />
       </button>
-      <ul className='dropdown-menu list-group file-menu'>
+      <ul className='dropdown-menu list-group file-menu pull-right'>
       {
         props.state.files.map((file) => {
           const name = file.get('name')
           const link = makePath({...props.state.current.toJS(), state: props.state, fileId: name})
           const rowClass = classNames('list-group-item', {
-            'current': name == props.state.current.get('fileId')
+            'current': name === props.state.current.get('fileId')
           })
           return (
             <li key={name} className={rowClass}>
               <Link to={link}>
-                {name}
+                {truncatePath(name)}
               </Link>
             </li>
           )
@@ -168,7 +182,7 @@ function RevisionButton(props) {
                 </Link>
               </li>
             )
-          })
+          }).reverse()
           return foo
         }())
       }
