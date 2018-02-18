@@ -56,6 +56,9 @@ export class Header extends React.Component {
                     <span className='glyphicon glyphicon-menu-hamburger'></span>
                   </button>
                   <ul className='dropdown-menu pull-right'>
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href='#/search'>Search</a></li>
+                    <li role="separator" className="divider"></li>
                     <li><User {...this.props} /></li>
                     <li><a href='#' onClick={this.props.logout}>Logout</a></li>
                   </ul>

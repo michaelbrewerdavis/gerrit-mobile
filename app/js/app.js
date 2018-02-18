@@ -8,6 +8,7 @@ import { syncHistoryWithStore } from 'react-router-redux'
 
 import Chrome from './components/chrome'
 import Dashboard from './dashboard'
+import Search from './search'
 import ReviewChange from './review-change'
 import ReviewFile from './review-file'
 import { reducers } from './reducers'
@@ -30,6 +31,7 @@ ReactDOM.render(
     <Router history={history}>
       <Route path='/' component={Chrome}>
         <IndexRoute component={Dashboard} />
+        <Route path='search' component={Search} />
         <Route path='c/:changeId'>
           <IndexRoute component={ReviewChange} />
           <Route path=':revisionId'>

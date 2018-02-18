@@ -10,7 +10,8 @@ const actions = {
   ...loginActions,
   loadDashboard,
   loadChange,
-  loadFile
+  loadFile,
+  loadSearch
 }
 export default actions
 
@@ -84,7 +85,7 @@ function loadChange(changeId, revisionId, baseRevisionId) {
 
 function loadChangeDetail(changeId) {
   return (dispatch, getState) => {
-    return api.request('/changes/' + changeId + '/detail?o=DETAILED_LABELS&o=ALL_REVISIONS&o=CURRENT_COMMIT&o=MESSAGES&o=CURRENT_ACTIONS&o=CHANGE_ACTIONS')
+    return api.request('/changes/' + changeId + '/detail?o=DETAILED_LABELS&o=ALL_REVISIONS&o=CURRENT_COMMIT&o=MESSAGES&o=CURRENT_ACTIONS&o=CHANGE_ACTIONS&o=SUBMITTABLE')
     .then((response) => {
       return dispatch(actions.setChange(immutableFromJS(response)))
     })
@@ -144,5 +145,33 @@ function loadFile(changeId, revisionId, baseRevisionId, fileId) {
       dispatch(actions.stopLoading(loadKey))
     })
     .catch(loadErrorHandler(dispatch))
+  }
+}
+
+function loadSearch(query) {
+  return (dispatch, getState) => {
+    const loadKey = getLoadKey('search', query)
+
+    if (getState().app.get('error') !== '' ||
+        getState().app.get('loadsInProgress').includes(loadKey))
+    {
+      return
+    }
+
+    dispatch(actions.startLoading(loadKey))
+    dispatch(actions.startSearch(query))
+    return dispatch(actions.login())
+    .then( () => {
+      return api.request('/changes/?q=' + query + '&o=LABELS&o=DETAILED_ACCOUNTS')
+    })
+    .then( (response) => {
+      dispatch(actions.setCurrentSearch(query))
+      dispatch(actions.setSearchResults(immutableFromJS(response)))
+      dispatch(actions.stopSearch(query))
+      dispatch(actions.stopLoading(loadKey))
+    })
+    .catch( (error) => {
+      loadErrorHandler(dispatch)(error)
+    })
   }
 }

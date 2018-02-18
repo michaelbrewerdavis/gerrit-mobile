@@ -14,6 +14,11 @@ const app = combineReducersImmutable({
     stopLoading: (loads, action) => loads.delete(action.payload),
     clearLoading: (loads, action) => Set()
   }, Set()),
+  searchesInProgress: handleActions({
+    startSearch: (searches, action) => searches.add(action.payload),
+    stopSearch: (searches, action) => searches.delete(action.payload),
+    clearSearch: (loads, action) => Set()
+  }, Set()),
   error: handleActions({
     setError: setData
   }, '')
@@ -31,6 +36,9 @@ const current = combineReducersImmutable({
   }, ''),
   fileId: handleActions({
     setCurrentFileId: setData
+  }, ''),
+  search: handleActions({
+    setCurrentSearch: setData
   }, '')
 })
 
@@ -61,6 +69,11 @@ const file = handleActions({
   clearData
 }, Map())
 
+const searchResults = handleActions({
+  setSearchResults: setData,
+  clearData
+}, Map())
+
 export const reducers = combineReducers({
   app,
   user,
@@ -70,5 +83,6 @@ export const reducers = combineReducers({
   comments,
   files,
   file,
-  routing
+  routing,
+  searchResults
 })

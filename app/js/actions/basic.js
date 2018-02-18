@@ -14,5 +14,10 @@ export default {
   setChanges: createAction('setChanges'),
   setChange: createAction('setChange'),
   setFile: createAction('setFile'),
-  setFiles: createAction('setFiles')
+  setFiles: createAction('setFiles'),
+  startSearch: createAction('startSearch'),
+  stopSearch: createAction('stopSearch'),
+  clearSearch: createAction('clearSearch'),
+  setCurrentSearch: createAction('setCurrentSearch'),
+  setSearchResults: createAction('setSearchResults')
 }

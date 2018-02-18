@@ -470,3 +470,7 @@ body {
 .file-list-path {
   font-size: 60%;
 }
+
+.search-header {
+  padding: 10px 0;
+}
